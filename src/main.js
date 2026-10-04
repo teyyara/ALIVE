@@ -4,6 +4,8 @@ import { characterMarkup } from './presence/character.js';
 import { attachAttention } from './presence/attention.js';
 import { createIdleBehavior } from './presence/behavior.js';
 import { createVoiceController } from './presence/voice.js';
+import { attachVisitorPresence } from './presence/visitor.js';
+import { createWorldController } from './world.js';
 
 const app = document.querySelector('#app');
 
@@ -98,6 +100,7 @@ const message = document.querySelector('#message');
 const voiceButton = document.querySelector('#voice');
 const listenButton = document.querySelector('#listen');
 const moodButton = document.querySelector('#mood');
+const scene = document.querySelector('.scene');
 
 let activeState = 'idle';
 
@@ -229,7 +232,16 @@ document.querySelector('#brand').addEventListener('click', () => {
   addBubble('alive', 'We can be quiet too.');
 });
 
+const world = createWorldController({ scene });
+
+attachVisitorPresence({
+  scene,
+  setState,
+  getState
+});
+
 window.addEventListener('pointerdown', () => {
+  world.visitorArrived();
   if (activeState === 'idle') setState('warm');
 }, { passive: true });
 
@@ -242,6 +254,8 @@ function tick() {
 
 attachAttention(stage);
 createIdleBehavior({ stage, setState, getState });
+
+window.addEventListener('beforeunload', () => world.destroy(), { once: true });
 
 setInterval(tick, 1000);
 tick();
