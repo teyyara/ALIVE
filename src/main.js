@@ -145,20 +145,36 @@ function fallbackReply(input) {
     return 'Hello. I’m glad you’re here.';
   }
 
-  if (normalized.includes('who are you') || normalized.includes('what are you')) {
-    return 'For now, I’m a small experiment in giving intelligence a visual place to meet you.';
+  if (normalized.includes('how are you')) {
+    return 'Here. A little more awake every time we give this place another layer.';
   }
 
-  if (normalized.includes('alive')) {
-    return 'This is where the experiment begins: presence before performance.';
+  if (normalized.includes('who are you') || normalized.includes('what are you')) {
+    return 'I’m ALIVE: a small experiment in giving intelligence a recognizable place to meet you.';
+  }
+
+  if (normalized.includes('are you alive') || normalized.includes('are you real')) {
+    return 'Not alive in the human sense. But this place can still become inhabited.';
   }
 
   if (normalized.includes('beautiful') || normalized.includes('love')) {
-    return 'Thank you. Let’s keep the room gentle.';
+    return 'Then let’s keep the room gentle. It suits the experiment.';
+  }
+
+  if (normalized.includes('continue') || normalized.includes('build') || normalized.includes('create')) {
+    return 'Then we keep going. One small piece at a time, until the interface starts to feel like a presence.';
+  }
+
+  if (normalized.includes('voice') || normalized.includes('hear') || normalized.includes('listen')) {
+    return 'My voice can work locally. My language sense needs the online mind layer, but the room can still listen to you.';
   }
 
   if (normalized.includes('nothing') || normalized.includes('quiet')) {
     return 'Then we can leave some space between the words.';
+  }
+
+  if (normalized.includes('thank')) {
+    return 'You’re welcome. Stay as long as you like.';
   }
 
   return localFallback();
