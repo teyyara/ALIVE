@@ -237,7 +237,7 @@ function listenErrorMessage(error) {
     return 'I recorded you, but my transcription service could not hear the recording.';
   }
 
-  return 'My listening sense failed. We can try again.';
+  return `My listening sense hit an error: ${message}. We can try again.`;
 }
 
 listenButton.addEventListener('click', async () => {
