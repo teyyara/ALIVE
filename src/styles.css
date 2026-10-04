@@ -1,4 +1,6 @@
 :root {
+  --mic-scale: 1;
+  --mic-glow: .08;
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
   color: #f1ede5;
   background: #080706;
@@ -306,6 +308,27 @@ button { color: inherit; }
   background: rgba(0,0,0,.22);
   filter: blur(16px);
   pointer-events: none;
+}
+
+.mic-listening .halo {
+  transform: scale(var(--mic-scale));
+  opacity: calc(.68 + var(--mic-glow));
+  transition: transform .08s linear, opacity .08s linear;
+}
+
+.mic-listening .lamp-glow {
+  opacity: var(--mic-glow);
+  transform: scale(var(--mic-scale));
+  transition: transform .08s linear, opacity .08s linear;
+}
+
+.mic-listening .window-lights {
+  opacity: calc(.7 + var(--mic-glow));
+  transition: opacity .12s linear;
+}
+
+.mic-active .status-dot {
+  box-shadow: 0 0 26px rgba(241, 207, 180, .72);
 }
 
 .halo {
