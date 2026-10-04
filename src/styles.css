@@ -601,6 +601,37 @@ button { color: inherit; }
   color: rgba(241,237,229,.86);
 }
 
+[data-state="listening"] .portrait-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(211,181,158,.34);
+  border-radius: 38px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.025),
+    0 0 34px rgba(211,181,158,.08);
+  animation: listening-ring 2.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+[data-state="listening"] .halo {
+  animation: listening-halo 2.2s ease-in-out infinite;
+}
+
+[data-state="speaking"] .portrait-frame {
+  filter: brightness(1.015);
+}
+
+@keyframes listening-ring {
+  0%, 100% { opacity: .35; transform: scale(.992); }
+  50% { opacity: .9; transform: scale(1.012); }
+}
+
+@keyframes listening-halo {
+  0%, 100% { transform: scale(1); opacity: .6; }
+  50% { transform: scale(1.055); opacity: .95; }
+}
+
 .footer {
   color: rgba(241,237,229,.23);
   font-size: 9px;
