@@ -60,6 +60,7 @@ button { color: inherit; }
 .window-sky {
   position: absolute;
   inset: 0;
+  filter: saturate(calc(.74 + var(--world-warmth)));
   background:
     radial-gradient(circle at 70% 26%, rgba(235,177,129,.72), transparent 8%),
     linear-gradient(180deg, #272b39 0%, #5e5360 44%, #2e2b34 69%, #111113 100%);
@@ -125,6 +126,35 @@ button { color: inherit; }
 }
 
 [data-state="warm"] .lamp-glow { opacity: 1.25; }
+
+[data-time="morning"] {
+  --world-warmth: .09;
+}
+[data-time="afternoon"] {
+  --world-warmth: .12;
+}
+[data-time="evening"] {
+  --world-warmth: .19;
+}
+[data-time="night"] {
+  --world-warmth: .08;
+}
+
+.visitor-present .ambient-a,
+.visitor-moving .ambient-a {
+  opacity: .25;
+  transform: scale(1.05);
+}
+
+.visitor-present .ambient-b {
+  opacity: .23;
+}
+
+.visitor-present .world::before {
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.06), rgba(0,0,0,.34) 72%, rgba(0,0,0,.7)),
+    radial-gradient(circle at var(--visitor-x, 50%) var(--visitor-y, 50%), rgba(255,202,154,.10), transparent 20%);
+}
 [data-state="warm"] .identity-portrait { filter: saturate(.9) contrast(.97) brightness(.9); }
 [data-state="thinking"] .identity-portrait { filter: saturate(.7) contrast(.97) brightness(.76); transform: scale(.994); }
 [data-state="curious"] .identity-portrait { filter: saturate(.92) contrast(.96) brightness(.88); }
@@ -156,6 +186,7 @@ button { color: inherit; }
 
 .scene {
   min-height: 100vh;
+  --world-warmth: .14;
   position: relative;
   display: grid;
   grid-template-rows: auto 1fr auto auto;
