@@ -41,6 +41,28 @@ function readJson(req, maxBytes = 30_000) {
   });
 }
 
+function readBuffer(req, maxBytes = 8_000_000) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let size = 0;
+
+    req.on('data', (chunk) => {
+      size += chunk.length;
+
+      if (size > maxBytes) {
+        reject(new Error('Audio request too large.'));
+        req.destroy();
+        return;
+      }
+
+      chunks.push(chunk);
+    });
+
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
+  });
+}
+
 async function handleTranscribe(req, res, apiKey, model) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -51,23 +73,22 @@ async function handleTranscribe(req, res, apiKey, model) {
     return sendJson(res, 503, { error: 'ALIVE voice input is not configured yet.' });
   }
 
-  let body;
+  const mimeType = req.headers['content-type']?.split(';')[0] || 'audio/webm';
+
+  if (!mimeType.startsWith('audio/')) {
+    return sendJson(res, 400, { error: 'ALIVE received an unsupported microphone format.' });
+  }
+
+  let buffer;
 
   try {
-    body = await readJson(req, 2_000_000);
+    buffer = await readBuffer(req, 8_000_000);
   } catch {
     return sendJson(res, 400, { error: 'The microphone recording was too large or malformed.' });
   }
 
-  const audio = body?.audio;
-  const mimeType = body?.mimeType || 'audio/webm';
-
-  if (
-    typeof audio !== 'string' ||
-    audio.length === 0 ||
-    audio.length > 12_000_000
-  ) {
-    return sendJson(res, 400, { error: 'Provide a supported microphone recording.' });
+  if (!buffer.length) {
+    return sendJson(res, 400, { error: 'The microphone returned an empty recording.' });
   }
 
   const extension = mimeType.startsWith('audio/ogg') ? 'ogg' :
@@ -77,7 +98,6 @@ async function handleTranscribe(req, res, apiKey, model) {
     'webm';
 
   try {
-    const buffer = Buffer.from(audio, 'base64');
     const file = new File(
       [buffer],
       `alive-recording.${extension}`,
@@ -87,7 +107,7 @@ async function handleTranscribe(req, res, apiKey, model) {
     const form = new FormData();
     form.append('file', file);
     form.append('model', process.env.ALIVE_TRANSCRIBE_MODEL || 'gpt-4o-mini-transcribe');
-    form.append('language', 'en');
+
 
     const upstream = await fetch('https://api.openai.com/v1/audio/transcriptions', {
       method: 'POST',
@@ -114,8 +134,12 @@ async function handleTranscribe(req, res, apiKey, model) {
     }
 
     return sendJson(res, 200, { text });
-  } catch {
-    return sendJson(res, 500, { error: 'The recording could not be transcribed.' });
+  } catch (error) {
+    return sendJson(
+      res,
+      500,
+      { error: error?.message || 'The recording could not be transcribed.' }
+    );
   }
 }
 
