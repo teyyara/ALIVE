@@ -19,9 +19,11 @@ export async function recordVoice({ onStart, onStop, onError, onLevel, maxDurati
   const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
   const chunks = [];
   let timer;
+  let silenceTimer;
   let audioContext;
   let analyser;
   let levelFrame;
+  let heardSpeech = false;
 
   try {
     audioContext = new AudioContext();
@@ -48,6 +50,17 @@ export async function recordVoice({ onStart, onStop, onError, onLevel, maxDurati
       const level = Math.min(1, rms * 3.6);
 
       onLevel?.(level);
+
+      if (level > 0.055) {
+        heardSpeech = true;
+        window.clearTimeout(silenceTimer);
+      } else if (heardSpeech) {
+        window.clearTimeout(silenceTimer);
+        silenceTimer = window.setTimeout(() => {
+          if (recorder.state !== 'inactive') recorder.stop();
+        }, 1400);
+      }
+
       levelFrame = window.requestAnimationFrame(readLevel);
     };
 
@@ -62,6 +75,7 @@ export async function recordVoice({ onStart, onStop, onError, onLevel, maxDurati
     onLevel?.(0);
     stream.getTracks().forEach((track) => track.stop());
     window.clearTimeout(timer);
+    window.clearTimeout(silenceTimer);
     audioContext?.close().catch(() => {});
   };
 
