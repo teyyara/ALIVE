@@ -97,6 +97,7 @@ button { color: inherit; }
   bottom: 10%;
   height: 25%;
   opacity: .7;
+  animation: city-glimmer 11s ease-in-out infinite;
   background-image:
     radial-gradient(circle, rgba(242,191,129,.95) 0 1.4px, transparent 1.6px),
     radial-gradient(circle, rgba(232,169,112,.72) 0 1.1px, transparent 1.4px);
@@ -151,6 +152,23 @@ button { color: inherit; }
 .visitor-settled .ambient-a {
   opacity: .2;
   transform: scale(1.02);
+}
+
+.visitor-settled .window {
+  opacity: .8;
+  box-shadow: 0 30px 90px rgba(0,0,0,.36);
+}
+
+.visitor-settled .lamp-glow {
+  opacity: .88;
+}
+
+.visitor-moving .lamp-glow {
+  opacity: calc(.55 + var(--visitor-speed, 0) * .16);
+}
+
+.visitor-present .status-dot {
+  animation-duration: 2.2s;
 }
 
 .visitor-rush .lamp-glow {
@@ -760,6 +778,13 @@ button { color: inherit; }
 @keyframes lamp-breathe {
   0%, 100% { opacity: .75; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.045); }
+}
+
+@keyframes city-glimmer {
+  0%, 100% { opacity: .58; transform: translate3d(0,0,0); }
+  24% { opacity: .74; }
+  52% { opacity: .62; transform: translate3d(-.4%,.2%,0); }
+  76% { opacity: .78; }
 }
 
 @keyframes grain {
