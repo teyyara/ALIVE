@@ -132,6 +132,7 @@ function addBubble(role, text) {
 }
 
 const conversationHistory = [];
+let mindUnavailable = false;
 
 function fallbackReply(input) {
   const normalized = input.toLowerCase();
@@ -185,8 +186,14 @@ composer.addEventListener('submit', (event) => {
     let reply;
 
     try {
-      reply = await requestPresenceReply(conversationHistory);
-    } catch {
+      reply = mindUnavailable
+        ? fallbackReply(input)
+        : await requestPresenceReply(conversationHistory);
+    } catch (error) {
+      if (/no credits|insufficient|billing|credit/i.test(error?.message || '')) {
+        mindUnavailable = true;
+      }
+
       reply = fallbackReply(input);
     }
 
