@@ -190,6 +190,42 @@ button { color: inherit; }
     linear-gradient(180deg, rgba(0,0,0,.06), rgba(0,0,0,.34) 72%, rgba(0,0,0,.7)),
     radial-gradient(circle at var(--visitor-x, 50%) var(--visitor-y, 50%), rgba(255,202,154,.10), transparent 20%);
 }
+
+.scene::after {
+  content: '';
+  position: absolute;
+  left: var(--visitor-x, 50%);
+  top: var(--visitor-y, 50%);
+  width: 150px;
+  height: 150px;
+  transform: translate(-50%, -50%) scale(calc(.72 + var(--visitor-speed, 0) * .3));
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgba(255,215,179,.13) 0%,
+    rgba(255,202,154,.055) 24%,
+    transparent 72%
+  );
+  filter: blur(8px);
+  opacity: calc(.18 + var(--visitor-speed, 0) * .48);
+  transition:
+    left .18s ease-out,
+    top .18s ease-out,
+    opacity .6s ease,
+    transform .6s ease;
+  z-index: 5;
+}
+
+.visitor-settled.scene::after {
+  opacity: .11;
+}
+
+.visitor-rush.scene::after {
+  width: 190px;
+  height: 190px;
+  opacity: .34;
+}
 [data-state="warm"] .identity-portrait { filter: saturate(.9) contrast(.97) brightness(.9); }
 [data-state="thinking"] .identity-portrait { filter: saturate(.7) contrast(.97) brightness(.76); transform: scale(.994); }
 [data-state="curious"] .identity-portrait { filter: saturate(.92) contrast(.96) brightness(.88); }
@@ -349,6 +385,18 @@ button { color: inherit; }
   transition: transform .08s linear, opacity .08s linear;
 }
 
+.mic-listening .portrait-frame {
+  transform: scale(calc(1 + var(--mic-level, 0) * .006));
+  transition: transform .08s linear;
+}
+
+.mic-active .identity-portrait {
+  filter:
+    saturate(.88)
+    contrast(.98)
+    brightness(calc(.83 + var(--mic-level, 0) * .045));
+}
+
 .mic-listening .lamp-glow {
   opacity: var(--mic-glow);
   transform: scale(var(--mic-scale));
@@ -382,12 +430,12 @@ button { color: inherit; }
 
 .character-shell {
   position: relative;
-  transition: transform 1.2s cubic-bezier(.2,.7,.2,1), filter 1.4s ease;
-
   width: min(88%, 560px);
   height: 100%;
   transform: translate3d(var(--attention-x, 0px), var(--attention-y, 0px), 0);
-  transition: transform 1.2s cubic-bezier(.2,.7,.2,1);
+  transition:
+    transform 1.2s cubic-bezier(.2,.7,.2,1),
+    filter 1.4s ease;
   will-change: transform;
   border-radius: 34px;
 }
