@@ -13,6 +13,19 @@ app.innerHTML = `
   <div class="ambient ambient-a"></div>
   <div class="ambient ambient-b"></div>
 
+  <div class="world" aria-hidden="true">
+    <div class="window">
+      <div class="window-sky"></div>
+      <div class="window-haze"></div>
+      <div class="window-horizon"></div>
+      <div class="window-lights"></div>
+      <div class="window-frame frame-v"></div>
+      <div class="window-frame frame-h"></div>
+    </div>
+    <div class="lamp-glow"></div>
+    <div class="room-shadow"></div>
+  </div>
+
   <header class="topbar">
     <button class="brand" id="brand" aria-label="Return to stillness">
       <span class="dot"></span>ALIVE
