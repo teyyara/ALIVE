@@ -124,6 +124,11 @@ button { color: inherit; }
   transform: translateY(-1px);
 }
 
+[data-state="warm"] .lamp-glow { opacity: 1.25; }
+[data-state="thinking"] .window { filter: saturate(.78) brightness(.88); }
+[data-state="curious"] .window-lights { opacity: .9; }
+[data-state="playful"] .lamp-glow { transform: scale(1.08); }
+
 .lamp-glow {
   position: absolute;
   left: 6vw;
@@ -231,6 +236,8 @@ button { color: inherit; }
 }
 
 .presence {
+  position: relative;
+  z-index: 10;
   width: min(1040px, calc(100% - 36px));
   margin: auto;
   display: grid;
