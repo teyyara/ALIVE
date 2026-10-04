@@ -202,6 +202,26 @@ voiceButton.addEventListener('click', () => {
   }
 });
 
+let activeRecognition = null;
+
+function listenErrorMessage(error) {
+  switch (error?.error) {
+    case 'not-allowed':
+    case 'service-not-allowed':
+      return 'My microphone access is blocked. Please allow the microphone for this page, then try again.';
+    case 'no-speech':
+      return 'I didn’t catch any speech. Come a little closer and try again.';
+    case 'audio-capture':
+      return 'I can’t access a microphone right now. Check that one is connected and available.';
+    case 'network':
+      return 'Speech input is unavailable on the current network or browser service.';
+    case 'aborted':
+      return '';
+    default:
+      return 'My listening sense failed to start. We can try again.';
+  }
+}
+
 listenButton.addEventListener('click', () => {
   const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -211,29 +231,64 @@ listenButton.addEventListener('click', () => {
     return;
   }
 
+  if (activeRecognition) {
+    activeRecognition.abort();
+    activeRecognition = null;
+    listenButton.textContent = 'Listen';
+    setState('warm');
+    return;
+  }
+
   const recognition = new Recognition();
+  activeRecognition = recognition;
   recognition.lang = navigator.language || 'en-US';
   recognition.interimResults = false;
+  recognition.continuous = false;
   recognition.maxAlternatives = 1;
 
   listenButton.textContent = 'Listening…';
   setState('listening');
 
+  recognition.onstart = () => {
+    listenButton.textContent = 'Listening…';
+    setState('listening');
+  };
+
   recognition.onresult = (event) => {
-    message.value = event.results[0][0].transcript;
+    const transcript = event.results?.[0]?.[0]?.transcript?.trim();
+
+    if (!transcript) {
+      addBubble('alive', 'I heard something, but I couldn’t make out the words.');
+      setState('curious');
+      return;
+    }
+
+    message.value = transcript;
     composer.requestSubmit();
   };
 
-  recognition.onerror = () => {
-    addBubble('alive', 'I couldn’t hear that. We can try again.');
-    setState('curious');
+  recognition.onerror = (event) => {
+    const text = listenErrorMessage(event);
+
+    if (text) {
+      addBubble('alive', text);
+      setState('curious');
+    }
   };
 
   recognition.onend = () => {
+    activeRecognition = null;
     listenButton.textContent = 'Listen';
   };
 
-  recognition.start();
+  try {
+    recognition.start();
+  } catch (error) {
+    activeRecognition = null;
+    listenButton.textContent = 'Listen';
+    addBubble('alive', 'My listening sense could not start. Please try again.');
+    setState('curious');
+  }
 });
 
 const atmospheres = ['curious', 'warm', 'playful', 'thinking', 'listening'];
