@@ -23,3 +23,17 @@ npm run dev
 > Nothing should move merely because it can. Every movement should communicate something.
 
 ALIVE should feel inhabited, not animated.
+
+
+## Conversation mind
+
+ALIVE can use the OpenAI Responses API through the server-side `/api/chat` boundary. The browser never receives the API key.
+
+For local development:
+
+1. Copy `.env.example` to `.env.local`.
+2. Put your API key in `OPENAI_API_KEY`.
+3. Keep `ALIVE_MODEL=gpt-6-luna` unless you choose another model available to your API project.
+4. Restart `npm run dev`.
+
+The server-side route uses `store: false` and receives only the recent conversation history from the current ALIVE session.
