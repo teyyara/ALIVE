@@ -107,6 +107,26 @@ const scene = document.querySelector('.scene');
 
 const presenceMemory = createPresenceMemory();
 
+const VOICE_PREFERENCE_KEY = 'alive-voice-enabled';
+const MOOD_PREFERENCE_KEY = 'alive-atmosphere';
+
+function readPreference(key, fallback) {
+  try {
+    const value = localStorage.getItem(key);
+    return value ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writePreference(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Preferences simply remain session-only when storage is unavailable.
+  }
+}
+
 let activeState = 'idle';
 
 function getState() {
@@ -234,6 +254,7 @@ voiceButton.addEventListener('click', () => {
   const enabled = voice.setEnabled(!voiceButton.matches('[aria-pressed="true"]'));
   voiceButton.setAttribute('aria-pressed', String(enabled));
   voiceButton.textContent = enabled ? 'Voice on' : 'Voice';
+  writePreference(VOICE_PREFERENCE_KEY, String(enabled));
 
   if (enabled) {
     setState('speaking');
@@ -349,11 +370,16 @@ listenButton.addEventListener('click', async () => {
 });
 
 const atmospheres = ['curious', 'warm', 'playful', 'thinking', 'listening'];
-let atmosphereIndex = 0;
+let atmosphereIndex = Math.max(
+  0,
+  atmospheres.indexOf(readPreference(MOOD_PREFERENCE_KEY, 'curious'))
+);
 
 moodButton.addEventListener('click', () => {
   atmosphereIndex = (atmosphereIndex + 1) % atmospheres.length;
-  setState(atmospheres[atmosphereIndex]);
+  const atmosphere = atmospheres[atmosphereIndex];
+  writePreference(MOOD_PREFERENCE_KEY, atmosphere);
+  setState(atmosphere);
 });
 
 document.querySelector('#brand').addEventListener('click', () => {
@@ -392,6 +418,13 @@ window.addEventListener('beforeunload', () => {
 setInterval(tick, 1000);
 tick();
 setState('idle');
+
+const savedVoicePreference = readPreference(VOICE_PREFERENCE_KEY, 'false') === 'true';
+
+if (savedVoicePreference && voice.available) {
+  voiceButton.setAttribute('aria-pressed', 'true');
+  voiceButton.textContent = 'Voice on';
+}
 
 if (presenceMemory.returning) {
   window.setTimeout(() => {
