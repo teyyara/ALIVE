@@ -136,6 +136,7 @@ function addBubble(role, text) {
 
 const conversationHistory = [];
 let mindUnavailable = false;
+let transcriptionUnavailable = false;
 
 function fallbackReply(input) {
   const normalized = input.toLowerCase();
@@ -292,11 +293,27 @@ listenButton.addEventListener('click', async () => {
     listenButton.textContent = 'Thinking…';
     setState('thinking');
 
-    const transcript = await transcribeBlob(blob);
+    if (transcriptionUnavailable) {
+      addBubble('alive', 'I can feel your voice, but my words cannot hear it yet. The room is still with you.');
+      listenButton.textContent = 'Listen';
+      setState('warm');
+      return;
+    }
 
-    message.value = transcript;
-    listenButton.textContent = 'Listen';
-    composer.requestSubmit();
+    try {
+      const transcript = await transcribeBlob(blob);
+      message.value = transcript;
+      listenButton.textContent = 'Listen';
+      composer.requestSubmit();
+    } catch (error) {
+      if (/no credits|insufficient|billing|credit/i.test(error?.message || '')) {
+        transcriptionUnavailable = true;
+        addBubble('alive', 'I can feel your voice, but my language sense is out of credits for now.');
+        setState('curious');
+      } else {
+        throw error;
+      }
+    }
   } catch (error) {
     activeRecorder = null;
     recordingBusy = false;
