@@ -16,14 +16,14 @@ function sendJson(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
-function readJson(req) {
+function readJson(req, maxBytes = 30_000) {
   return new Promise((resolve, reject) => {
     let raw = '';
 
     req.on('data', (chunk) => {
       raw += chunk;
 
-      if (raw.length > 30000) {
+      if (raw.length > maxBytes) {
         reject(new Error('Request too large.'));
         req.destroy();
       }
@@ -54,9 +54,9 @@ async function handleTranscribe(req, res, apiKey, model) {
   let body;
 
   try {
-    body = await readJson(req);
+    body = await readJson(req, 2_000_000);
   } catch {
-    return sendJson(res, 400, { error: 'Invalid recording body.' });
+    return sendJson(res, 400, { error: 'The microphone recording was too large or malformed.' });
   }
 
   const audio = body?.audio;
@@ -132,7 +132,7 @@ async function handleChat(req, res, apiKey, model) {
   let body;
 
   try {
-    body = await readJson(req);
+    body = await readJson(req, 30_000);
   } catch {
     return sendJson(res, 400, { error: 'Invalid request body.' });
   }
