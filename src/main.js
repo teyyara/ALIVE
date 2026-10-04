@@ -41,7 +41,14 @@ app.innerHTML = `
       <div class="halo"></div>
       <div class="portrait-frame">
         <div class="character-shell" id="character-shell">
-          ${characterMarkup()}
+          <img
+            class="identity-portrait"
+            src="/assets/alive-portrait.jpg"
+            alt="ALIVE"
+          />
+          <div class="character-generated" aria-hidden="true">
+            ${characterMarkup()}
+          </div>
         </div>
       </div>
       <div class="shimmer"></div>
