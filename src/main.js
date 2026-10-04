@@ -253,6 +253,8 @@ listenButton.addEventListener('click', () => {
     return;
   }
 
+  voice.stop();
+
   const recognition = new Recognition();
   activeRecognition = recognition;
   recognition.lang = 'en-US';
