@@ -20,6 +20,131 @@ body {
 button, input { font: inherit; }
 button { color: inherit; }
 
+.world {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.world::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.42) 72%, rgba(0,0,0,.74)),
+    radial-gradient(circle at 14% 56%, rgba(255,190,135,.1), transparent 18%);
+}
+
+.window {
+  position: absolute;
+  width: min(34vw, 520px);
+  height: min(62vh, 710px);
+  right: 4vw;
+  top: 12vh;
+  border: 1px solid rgba(255,255,255,.08);
+  background: #171615;
+  box-shadow: 0 30px 80px rgba(0,0,0,.32);
+  opacity: .76;
+  transform: perspective(1000px) rotateY(-2deg);
+}
+
+.window::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, rgba(255,255,255,.035), transparent 42%);
+}
+
+.window-sky {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 70% 26%, rgba(235,177,129,.72), transparent 8%),
+    linear-gradient(180deg, #272b39 0%, #5e5360 44%, #2e2b34 69%, #111113 100%);
+}
+
+.window-haze {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 17%;
+  height: 24%;
+  background: linear-gradient(180deg, transparent, rgba(211,185,167,.1), transparent);
+  filter: blur(10px);
+}
+
+.window-horizon {
+  position: absolute;
+  left: -6%;
+  right: -6%;
+  bottom: 13%;
+  height: 21%;
+  background:
+    linear-gradient(160deg, transparent 24%, rgba(25,25,29,.92) 25% 56%, transparent 57%),
+    linear-gradient(20deg, transparent 40%, rgba(19,19,23,.9) 41% 68%, transparent 69%);
+  filter: blur(.3px);
+}
+
+.window-lights {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 10%;
+  height: 25%;
+  opacity: .7;
+  background-image:
+    radial-gradient(circle, rgba(242,191,129,.95) 0 1.4px, transparent 1.6px),
+    radial-gradient(circle, rgba(232,169,112,.72) 0 1.1px, transparent 1.4px);
+  background-size: 42px 31px, 57px 41px;
+  background-position: 12px 6px, 22px 18px;
+  mask-image: linear-gradient(180deg, transparent, #000 34%, #000);
+}
+
+.window-frame {
+  position: absolute;
+  background: rgba(8,7,6,.74);
+  box-shadow: 0 0 12px rgba(0,0,0,.2);
+}
+
+.frame-v {
+  top: 0;
+  bottom: 0;
+  left: 56%;
+  width: 2px;
+  transform: translateX(-1px);
+}
+
+.frame-h {
+  left: 0;
+  right: 0;
+  top: 54%;
+  height: 2px;
+  transform: translateY(-1px);
+}
+
+.lamp-glow {
+  position: absolute;
+  left: 6vw;
+  top: 32vh;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(239,190,145,.2), rgba(239,190,145,.06) 35%, transparent 70%);
+  filter: blur(18px);
+  animation: lamp-breathe 5.8s ease-in-out infinite;
+}
+
+.room-shadow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 27%;
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,.28));
+}
+
 .scene {
   min-height: 100vh;
   position: relative;
@@ -488,6 +613,11 @@ button { color: inherit; }
 @keyframes shimmer {
   0%,35% { transform: translateX(-80%); }
   55%,100% { transform: translateX(80%); }
+}
+
+@keyframes lamp-breathe {
+  0%, 100% { opacity: .75; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.045); }
 }
 
 @keyframes grain {
