@@ -9,8 +9,8 @@ export function attachAttention(stage) {
   let raf = 0;
 
   const update = (event) => {
-    targetX = (event.clientX / window.innerWidth - 0.5);
-    targetY = (event.clientY / window.innerHeight - 0.5);
+    targetX = event.clientX / window.innerWidth - 0.5;
+    targetY = event.clientY / window.innerHeight - 0.5;
   };
 
   const animate = () => {
@@ -21,6 +21,11 @@ export function attachAttention(stage) {
     stage.style.setProperty('--attention-y', `${(currentY * 13).toFixed(2)}px`);
     stage.style.setProperty('--attention-rotate', `${(currentX * 2.2).toFixed(2)}deg`);
     stage.style.setProperty('--attention-tilt', `${(currentY * -1.4).toFixed(2)}deg`);
+
+    stage.style.setProperty('--gaze-x', `${(currentX * 7).toFixed(2)}px`);
+    stage.style.setProperty('--gaze-y', `${(currentY * 4).toFixed(2)}px`);
+    stage.style.setProperty('--brow-x', `${(currentX * 2.5).toFixed(2)}px`);
+    stage.style.setProperty('--brow-y', `${(currentY * 1.6).toFixed(2)}px`);
 
     raf = requestAnimationFrame(animate);
   };
