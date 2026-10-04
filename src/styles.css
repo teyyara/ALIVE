@@ -215,6 +215,11 @@ button { color: inherit; }
   transform-origin: center;
 }
 
+.blink .eye {
+  animation: blink .155s ease-in-out;
+  transform-origin: center;
+}
+
 .character .mouth.smile {
   opacity: 0;
   transition: opacity .55s ease, transform .55s ease;
@@ -458,6 +463,11 @@ button { color: inherit; }
 @keyframes mouth-talk {
   from { transform: scaleY(.7); }
   to { transform: scaleY(1.15); }
+}
+
+@keyframes blink {
+  0%, 100% { transform: scaleY(1); }
+  46%, 60% { transform: scaleY(.05); }
 }
 
 @keyframes pulse {
