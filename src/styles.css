@@ -144,8 +144,23 @@ button { color: inherit; }
 
 .visitor-present .ambient-a,
 .visitor-moving .ambient-a {
-  opacity: .25;
-  transform: scale(1.05);
+  opacity: calc(.18 + var(--visitor-speed, 0) * .11);
+  transform: scale(calc(1 + var(--visitor-speed, 0) * .08));
+}
+
+.visitor-settled .ambient-a {
+  opacity: .2;
+  transform: scale(1.02);
+}
+
+.visitor-rush .lamp-glow {
+  transition: opacity .18s ease, transform .18s ease;
+  opacity: .3;
+}
+
+.visitor-rush .window {
+  transition: filter .22s ease;
+  filter: brightness(1.025) saturate(1.03);
 }
 
 .visitor-present .ambient-b {
@@ -349,6 +364,8 @@ button { color: inherit; }
 
 .character-shell {
   position: relative;
+  transition: transform 1.2s cubic-bezier(.2,.7,.2,1), filter 1.4s ease;
+
   width: min(88%, 560px);
   height: 100%;
   transform: translate3d(var(--attention-x, 0px), var(--attention-y, 0px), 0);
