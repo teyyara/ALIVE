@@ -41,14 +41,25 @@ export default async function handler(req, res) {
     return json(res, 503, { error: 'ALIVE voice input is not configured yet.' });
   }
 
-  const { audio, mimeType = 'audio/webm' } = req.body ?? {};
+  const mimeType = req.headers['content-type']?.split(';')[0] || 'audio/webm';
+  const audio = req.body;
 
-  if (!validAudio(audio, mimeType)) {
-    return json(res, 400, { error: 'Provide a supported microphone recording.' });
-  }
+  let buffer;
 
   try {
-    const buffer = decodeBase64(audio);
+    if (Buffer.isBuffer(audio)) {
+      buffer = audio;
+    } else if (typeof audio === 'string') {
+      buffer = decodeBase64(audio);
+    } else if (audio instanceof Uint8Array) {
+      buffer = Buffer.from(audio);
+    } else {
+      throw new Error('No microphone recording was received.');
+    }
+
+    if (buffer.length > MAX_AUDIO_BYTES) {
+      throw new Error('Recording is too large.');
+    }
     const file = new File(
       [buffer],
       ALLOWED_MIME_TYPES.get(mimeType) || 'audio.webm',
@@ -58,7 +69,7 @@ export default async function handler(req, res) {
     const form = new FormData();
     form.append('file', file);
     form.append('model', process.env.ALIVE_TRANSCRIBE_MODEL || 'gpt-4o-mini-transcribe');
-    form.append('language', 'en');
+
 
     const upstream = await fetch('https://api.openai.com/v1/audio/transcriptions', {
       method: 'POST',
@@ -85,7 +96,11 @@ export default async function handler(req, res) {
     }
 
     return json(res, 200, { text });
-  } catch {
-    return json(res, 500, { error: 'The recording could not be transcribed.' });
+  } catch (error) {
+    return json(
+      res,
+      500,
+      { error: error?.message || 'The recording could not be transcribed.' }
+    );
   }
 }
