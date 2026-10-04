@@ -411,6 +411,19 @@ button { color: inherit; }
     brightness(calc(.83 + var(--mic-level, 0) * .045));
 }
 
+.mic-active .portrait-frame {
+  border-radius: 38px;
+  box-shadow:
+    0 0 calc(30px + var(--mic-level, 0) * 42px) rgba(232, 195, 162, calc(.045 + var(--mic-level, 0) * .15)),
+    0 0 0 1px rgba(255,255,255,.045);
+}
+
+.mic-active .shimmer {
+  opacity: calc(.46 + var(--mic-level, 0) * .36);
+  transform: translateX(calc(-40% + var(--mic-level, 0) * 20%));
+  transition: opacity .1s linear, transform .1s linear;
+}
+
 .mic-listening .lamp-glow {
   opacity: var(--mic-glow);
   transform: scale(var(--mic-scale));
