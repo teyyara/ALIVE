@@ -157,7 +157,11 @@ function responseFor(input) {
 
 const voice = createVoiceController({
   onStart: () => setState('speaking'),
-  onEnd: () => setState('warm')
+  onEnd: () => setState('warm'),
+  onError: () => {
+    addBubble('alive', 'My voice could not start here. The room is still listening.');
+    setState('curious');
+  }
 });
 
 composer.addEventListener('submit', (event) => {
@@ -179,10 +183,23 @@ composer.addEventListener('submit', (event) => {
 });
 
 voiceButton.addEventListener('click', () => {
+  if (!voice.available) {
+    addBubble('alive', 'Voice output is not available in this browser.');
+    setState('curious');
+    return;
+  }
+
   const enabled = voice.setEnabled(!voiceButton.matches('[aria-pressed="true"]'));
   voiceButton.setAttribute('aria-pressed', String(enabled));
   voiceButton.textContent = enabled ? 'Voice on' : 'Voice';
-  setState(enabled ? 'warm' : 'idle');
+
+  if (enabled) {
+    setState('speaking');
+    voice.speak('I’m here.');
+  } else {
+    voice.stop();
+    setState('idle');
+  }
 });
 
 listenButton.addEventListener('click', () => {
@@ -255,7 +272,10 @@ function tick() {
 attachAttention(stage);
 createIdleBehavior({ stage, setState, getState });
 
-window.addEventListener('beforeunload', () => world.destroy(), { once: true });
+window.addEventListener('beforeunload', () => {
+  world.destroy();
+  voice.destroy();
+}, { once: true });
 
 setInterval(tick, 1000);
 tick();
