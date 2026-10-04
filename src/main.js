@@ -103,6 +103,7 @@ function setState(nextState) {
   const state = STATES[activeState];
 
   shell.dataset.state = activeState;
+  document.querySelector('.scene').dataset.state = activeState;
   stateLabel.textContent = state.label;
   stateSublabel.textContent = state.sublabel;
   line.textContent = state.line;
