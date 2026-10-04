@@ -37,3 +37,11 @@ For local development:
 4. Restart `npm run dev`.
 
 The server-side route uses `store: false` and receives only the recent conversation history from the current ALIVE session.
+
+## Current experience
+
+The first presence layer is now intentionally useful even without API credits. The browser handles pointer attention, visitor presence, local microphone level sensing, voice output, ambient response, and small local conversational fallbacks. Paid services are isolated behind server-side endpoints.
+
+When API credits are unavailable, ALIVE stops retrying the paid mind/transcription path for the current session and remains responsive locally rather than becoming a broken shell.
+
+The portrait asset in `public/assets/alive-portrait.jpg` is currently a temporary compressed delivery of the chosen identity. The high-quality source should replace it later without changing the identity itself.
