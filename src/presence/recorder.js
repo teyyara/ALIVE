@@ -66,28 +66,13 @@ export async function recordVoice({ onStart, onStop, onError, maxDurationMs = 12
   };
 }
 
-export async function blobToBase64(blob) {
-  const dataUrl = await new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result);
-    reader.onerror = () => reject(reader.error || new Error('Could not read the recording.'));
-    reader.readAsDataURL(blob);
-  });
-
-  const comma = dataUrl.indexOf(',');
-  return comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
-}
-
 export async function transcribeBlob(blob) {
-  const base64 = await blobToBase64(blob);
-
   const response = await fetch('/api/transcribe', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      audio: base64,
-      mimeType: blob.type || 'audio/webm'
-    })
+    headers: {
+      'Content-Type': blob.type || 'audio/webm'
+    },
+    body: blob
   });
 
   const data = await response.json().catch(() => ({}));
