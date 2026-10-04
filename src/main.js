@@ -6,6 +6,7 @@ import { createIdleBehavior } from './presence/behavior.js';
 import { createVoiceController } from './presence/voice.js';
 import { attachVisitorPresence } from './presence/visitor.js';
 import { createWorldController } from './world.js';
+import { localFallback, requestPresenceReply } from './presence/conversation.js';
 
 const app = document.querySelector('#app');
 
@@ -129,7 +130,9 @@ function addBubble(role, text) {
   conversation.scrollTop = conversation.scrollHeight;
 }
 
-function responseFor(input) {
+const conversationHistory = [];
+
+function fallbackReply(input) {
   const normalized = input.toLowerCase();
 
   if (/^(hi|hello|hey|salut|bonjour)\b/.test(normalized)) {
@@ -152,7 +155,7 @@ function responseFor(input) {
     return 'Then we can leave some space between the words.';
   }
 
-  return 'I’m listening. The deeper conversation will come as ALIVE grows.';
+  return localFallback();
 }
 
 const voice = createVoiceController({
@@ -172,14 +175,25 @@ composer.addEventListener('submit', (event) => {
 
   addBubble('user', input);
   message.value = '';
+  conversationHistory.push({ role: 'user', content: input });
   setState('listening');
 
-  window.setTimeout(() => {
-    const reply = responseFor(input);
+  window.setTimeout(async () => {
+    setState('thinking');
+
+    let reply;
+
+    try {
+      reply = await requestPresenceReply(conversationHistory);
+    } catch {
+      reply = fallbackReply(input);
+    }
+
+    conversationHistory.push({ role: 'assistant', content: reply });
     addBubble('alive', reply);
-    setState(input.length > 32 ? 'thinking' : 'warm');
+    setState('warm');
     voice.speak(reply);
-  }, 420);
+  }, 280);
 });
 
 voiceButton.addEventListener('click', () => {
