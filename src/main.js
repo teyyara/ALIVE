@@ -257,9 +257,16 @@ listenButton.addEventListener('click', async () => {
   try {
     activeRecorder = await recordVoice({
       maxDurationMs: 15000,
+      onLevel: (level) => {
+        scene.style.setProperty('--mic-level', level.toFixed(3));
+        scene.style.setProperty('--mic-scale', (1 + level * 0.08).toFixed(3));
+        scene.style.setProperty('--mic-glow', (0.08 + level * 0.34).toFixed(3));
+        scene.classList.toggle('mic-active', level > 0.035);
+      },
       onStart: () => {
         listenButton.textContent = 'Stop listening';
         setState('listening');
+        scene.classList.add('mic-listening');
       }
     });
 
@@ -267,6 +274,10 @@ listenButton.addEventListener('click', async () => {
 
     const blob = await activeRecorder.result;
     activeRecorder = null;
+    scene.classList.remove('mic-listening', 'mic-active');
+    scene.style.setProperty('--mic-level', '0');
+    scene.style.setProperty('--mic-scale', '1');
+    scene.style.setProperty('--mic-glow', '0.08');
 
     listenButton.textContent = 'Thinking…';
     setState('thinking');
@@ -279,6 +290,10 @@ listenButton.addEventListener('click', async () => {
   } catch (error) {
     activeRecorder = null;
     recordingBusy = false;
+    scene.classList.remove('mic-listening', 'mic-active');
+    scene.style.setProperty('--mic-level', '0');
+    scene.style.setProperty('--mic-scale', '1');
+    scene.style.setProperty('--mic-glow', '0.08');
     listenButton.textContent = 'Listen';
 
     const text = listenErrorMessage(error);
