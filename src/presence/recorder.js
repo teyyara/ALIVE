@@ -1,4 +1,4 @@
-export async function recordVoice({ onStart, onStop, onError, maxDurationMs = 12000 } = {}) {
+export async function recordVoice({ onStart, onStop, onError, onLevel, maxDurationMs = 12000 } = {}) {
   if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
     throw new Error('This browser does not support direct microphone recording.');
   }
@@ -19,10 +19,50 @@ export async function recordVoice({ onStart, onStop, onError, maxDurationMs = 12
   const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
   const chunks = [];
   let timer;
+  let audioContext;
+  let analyser;
+  let levelFrame;
+
+  try {
+    audioContext = new AudioContext();
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256;
+    analyser.smoothingTimeConstant = 0.82;
+
+    const source = audioContext.createMediaStreamSource(stream);
+    source.connect(analyser);
+
+    const data = new Uint8Array(analyser.fftSize);
+
+    const readLevel = () => {
+      analyser.getByteTimeDomainData(data);
+
+      let sum = 0;
+
+      for (let index = 0; index < data.length; index += 1) {
+        const normalized = (data[index] - 128) / 128;
+        sum += normalized * normalized;
+      }
+
+      const rms = Math.sqrt(sum / data.length);
+      const level = Math.min(1, rms * 3.6);
+
+      onLevel?.(level);
+      levelFrame = window.requestAnimationFrame(readLevel);
+    };
+
+    readLevel();
+  } catch {
+    audioContext = null;
+    analyser = null;
+  }
 
   const stopTracks = () => {
+    window.cancelAnimationFrame(levelFrame);
+    onLevel?.(0);
     stream.getTracks().forEach((track) => track.stop());
     window.clearTimeout(timer);
+    audioContext?.close().catch(() => {});
   };
 
   const promise = new Promise((resolve, reject) => {
