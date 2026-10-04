@@ -7,6 +7,7 @@ import { createVoiceController } from './presence/voice.js';
 import { attachVisitorPresence } from './presence/visitor.js';
 import { createWorldController } from './world.js';
 import { localFallback, requestPresenceReply } from './presence/conversation.js';
+import { recordVoice, transcribeBlob } from './presence/recorder.js';
 
 const app = document.querySelector('#app');
 
@@ -216,114 +217,76 @@ voiceButton.addEventListener('click', () => {
   }
 });
 
-let activeRecognition = null;
+let activeRecorder = null;
+let recordingBusy = false;
 
 function listenErrorMessage(error) {
-  switch (error?.error) {
-    case 'not-allowed':
-    case 'service-not-allowed':
-      return 'My microphone access is blocked. Please allow the microphone for this page, then try again.';
-    case 'no-speech':
-      return 'I didn’t catch any speech. Come a little closer and try again.';
-    case 'audio-capture':
-      return 'I can’t access a microphone right now. Check that one is connected and available.';
-    case 'network':
-      return 'Speech input is unavailable on the current network or browser service.';
-    case 'aborted':
-      return '';
-    default:
-      return 'My listening sense failed to start. We can try again.';
+  if (!error) return 'My listening sense could not start. Please try again.';
+
+  const message = String(error.message || error.name || error);
+
+  if (/permission|denied|not allowed/i.test(message)) {
+    return 'My microphone access is blocked. Please allow the microphone for this page, then try again.';
   }
+
+  if (/not support|getUserMedia|MediaRecorder/i.test(message)) {
+    return 'This browser cannot provide direct microphone recording yet.';
+  }
+
+  if (/network|transcrib/i.test(message)) {
+    return 'I recorded you, but my transcription service could not hear the recording.';
+  }
+
+  return 'My listening sense failed. We can try again.';
 }
 
-listenButton.addEventListener('click', () => {
-  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+listenButton.addEventListener('click', async () => {
+  if (recordingBusy) return;
 
-  if (!Recognition) {
-    addBubble('alive', 'This browser does not expose speech recognition yet.');
-    setState('curious');
-    return;
-  }
-
-  if (activeRecognition) {
-    activeRecognition.abort();
-    activeRecognition = null;
-    listenButton.textContent = 'Listen';
-    setState('warm');
+  if (activeRecorder) {
+    activeRecorder.stop();
     return;
   }
 
   voice.stop();
 
-  const recognition = new Recognition();
-  activeRecognition = recognition;
-  recognition.lang = 'en-US';
-  recognition.interimResults = false;
-  recognition.continuous = false;
-  recognition.maxAlternatives = 1;
-
-  listenButton.textContent = 'Listening…';
+  recordingBusy = true;
+  listenButton.textContent = 'Starting…';
   setState('listening');
 
-  recognition.onstart = () => {
-    listenButton.textContent = 'Listening…';
-    setState('listening');
-  };
+  try {
+    activeRecorder = await recordVoice({
+      maxDurationMs: 15000,
+      onStart: () => {
+        listenButton.textContent = 'Stop listening';
+        setState('listening');
+      }
+    });
 
-  recognition.onresult = (event) => {
-    const transcript = event.results?.[0]?.[0]?.transcript?.trim();
+    recordingBusy = false;
 
-    if (!transcript) {
-      addBubble('alive', 'I heard something, but I couldn’t make out the words.');
-      setState('curious');
-      return;
-    }
+    const blob = await activeRecorder.result;
+    activeRecorder = null;
+
+    listenButton.textContent = 'Thinking…';
+    setState('thinking');
+
+    const transcript = await transcribeBlob(blob);
 
     message.value = transcript;
+    listenButton.textContent = 'Listen';
     composer.requestSubmit();
-  };
+  } catch (error) {
+    activeRecorder = null;
+    recordingBusy = false;
+    listenButton.textContent = 'Listen';
 
-  recognition.onerror = (event) => {
-    const text = listenErrorMessage(event);
+    const text = listenErrorMessage(error);
 
     if (text) {
       addBubble('alive', text);
       setState('curious');
     }
-  };
-
-  recognition.onend = () => {
-    activeRecognition = null;
-    listenButton.textContent = 'Listen';
-  };
-
-  const startRecognition = () => {
-    try {
-      recognition.start();
-    } catch (error) {
-      activeRecognition = null;
-      listenButton.textContent = 'Listen';
-      addBubble('alive', 'My listening sense could not start. Please try again.');
-      setState('curious');
-    }
-  };
-
-  if (navigator.permissions?.query) {
-    navigator.permissions.query({ name: 'microphone' })
-      .then((permission) => {
-        if (permission.state === 'denied') {
-          addBubble('alive', 'My microphone permission is blocked. Open this page’s site settings and allow the microphone.');
-          setState('curious');
-          activeRecognition = null;
-          listenButton.textContent = 'Listen';
-          return;
-        }
-
-        startRecognition();
-      })
-      .catch(() => startRecognition());
-  } else {
-    startRecognition();
   }
 });
 
