@@ -365,6 +365,20 @@ button { color: inherit; }
   will-change: transform;
 }
 
+.attention-held .halo {
+  transform: scale(1.035);
+  opacity: .92;
+}
+
+.attention-held .identity-portrait {
+  filter: saturate(.86) contrast(.98) brightness(.86);
+}
+
+.attention-held .shimmer {
+  animation-duration: 18s;
+  opacity: .72;
+}
+
 .stage::after {
   content: '';
   position: absolute;
