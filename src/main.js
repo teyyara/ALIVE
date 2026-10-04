@@ -241,7 +241,7 @@ listenButton.addEventListener('click', () => {
 
   const recognition = new Recognition();
   activeRecognition = recognition;
-  recognition.lang = navigator.language || 'en-US';
+  recognition.lang = 'en-US';
   recognition.interimResults = false;
   recognition.continuous = false;
   recognition.maxAlternatives = 1;
@@ -281,13 +281,33 @@ listenButton.addEventListener('click', () => {
     listenButton.textContent = 'Listen';
   };
 
-  try {
-    recognition.start();
-  } catch (error) {
-    activeRecognition = null;
-    listenButton.textContent = 'Listen';
-    addBubble('alive', 'My listening sense could not start. Please try again.');
-    setState('curious');
+  const startRecognition = () => {
+    try {
+      recognition.start();
+    } catch (error) {
+      activeRecognition = null;
+      listenButton.textContent = 'Listen';
+      addBubble('alive', 'My listening sense could not start. Please try again.');
+      setState('curious');
+    }
+  };
+
+  if (navigator.permissions?.query) {
+    navigator.permissions.query({ name: 'microphone' })
+      .then((permission) => {
+        if (permission.state === 'denied') {
+          addBubble('alive', 'My microphone permission is blocked. Open this page’s site settings and allow the microphone.');
+          setState('curious');
+          activeRecognition = null;
+          listenButton.textContent = 'Listen';
+          return;
+        }
+
+        startRecognition();
+      })
+      .catch(() => startRecognition());
+  } else {
+    startRecognition();
   }
 });
 
