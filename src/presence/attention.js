@@ -8,6 +8,7 @@ export function attachAttention(stage) {
   let currentY = 0;
   let raf = 0;
   let resting = true;
+  let dwellTimer;
 
   const update = (event) => {
     const rect = stage.getBoundingClientRect();
@@ -20,12 +21,29 @@ export function attachAttention(stage) {
     targetX = Math.max(-1, Math.min(1, (event.clientX - centerX) / rangeX));
     targetY = Math.max(-1, Math.min(1, (event.clientY - centerY) / rangeY));
     resting = false;
+
+    window.clearTimeout(dwellTimer);
+    stage.classList.remove('attention-held');
+
+    const insideStage =
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom;
+
+    if (insideStage) {
+      dwellTimer = window.setTimeout(() => {
+        stage.classList.add('attention-held');
+      }, 850);
+    }
   };
 
   const reset = () => {
     targetX = 0;
     targetY = 0;
     resting = true;
+    window.clearTimeout(dwellTimer);
+    stage.classList.remove('attention-held');
   };
 
   const animate = () => {
@@ -58,6 +76,7 @@ export function attachAttention(stage) {
     window.removeEventListener('pointermove', update);
     window.removeEventListener('pointerleave', reset);
     window.removeEventListener('blur', reset);
+    window.clearTimeout(dwellTimer);
     cancelAnimationFrame(raf);
   };
 }
