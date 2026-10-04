@@ -13,9 +13,20 @@ export function createVoiceController({ onStart, onEnd, onError }) {
     /aria/i,
     /jenny/i,
     /zira/i,
+    /susan/i,
+    /hazel/i,
     /google.*female/i,
     /microsoft.*female/i,
     /female/i
+  ];
+
+  const maleVoicePatterns = [
+    /david/i,
+    /mark/i,
+    /george/i,
+    /daniel/i,
+    /alex/i,
+    /male/i
   ];
 
   function loadVoices() {
@@ -26,7 +37,11 @@ export function createVoiceController({ onStart, onEnd, onError }) {
     const english = voices.filter((voice) => /^en(-|_)/i.test(voice.lang));
     selectedVoice =
       english.find((voice) => preferredVoicePatterns.some((pattern) => pattern.test(voice.name))) ||
-      english.find((voice) => /natural|neural|premium|enhanced/i.test(voice.name)) ||
+      english.find((voice) =>
+        /natural|neural|premium|enhanced/i.test(voice.name) &&
+        !maleVoicePatterns.some((pattern) => pattern.test(voice.name))
+      ) ||
+      english.find((voice) => !maleVoicePatterns.some((pattern) => pattern.test(voice.name))) ||
       english[0] ||
       voices[0] ||
       null;
@@ -51,7 +66,7 @@ export function createVoiceController({ onStart, onEnd, onError }) {
 
       const utterance = new SpeechSynthesisUtterance(text.trim());
       utterance.rate = 0.94;
-      utterance.pitch = 1.08;
+      utterance.pitch = 1.1;
       utterance.volume = 0.92;
       utterance.lang = 'en-US';
 
