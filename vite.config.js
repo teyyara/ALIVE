@@ -41,6 +41,84 @@ function readJson(req) {
   });
 }
 
+async function handleTranscribe(req, res, apiKey, model) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return sendJson(res, 405, { error: 'Method not allowed.' });
+  }
+
+  if (!apiKey) {
+    return sendJson(res, 503, { error: 'ALIVE voice input is not configured yet.' });
+  }
+
+  let body;
+
+  try {
+    body = await readJson(req);
+  } catch {
+    return sendJson(res, 400, { error: 'Invalid recording body.' });
+  }
+
+  const audio = body?.audio;
+  const mimeType = body?.mimeType || 'audio/webm';
+
+  if (
+    typeof audio !== 'string' ||
+    audio.length === 0 ||
+    audio.length > 12_000_000
+  ) {
+    return sendJson(res, 400, { error: 'Provide a supported microphone recording.' });
+  }
+
+  const extension = mimeType.startsWith('audio/ogg') ? 'ogg' :
+    mimeType.startsWith('audio/wav') ? 'wav' :
+    mimeType.startsWith('audio/mp4') ? 'mp4' :
+    mimeType.startsWith('audio/mpeg') ? 'mp3' :
+    'webm';
+
+  try {
+    const buffer = Buffer.from(audio, 'base64');
+    const file = new File(
+      [buffer],
+      `alive-recording.${extension}`,
+      { type: mimeType.split(';')[0] }
+    );
+
+    const form = new FormData();
+    form.append('file', file);
+    form.append('model', process.env.ALIVE_TRANSCRIBE_MODEL || 'gpt-4o-mini-transcribe');
+    form.append('language', 'en');
+
+    const upstream = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: form
+    });
+
+    const data = await upstream.json();
+
+    if (!upstream.ok) {
+      return sendJson(
+        res,
+        upstream.status,
+        { error: data?.error?.message || 'The transcription service rejected the recording.' }
+      );
+    }
+
+    const text = typeof data?.text === 'string' ? data.text.trim() : '';
+
+    if (!text) {
+      return sendJson(res, 422, { error: 'No speech was detected in the recording.' });
+    }
+
+    return sendJson(res, 200, { text });
+  } catch {
+    return sendJson(res, 500, { error: 'The recording could not be transcribed.' });
+  }
+}
+
 async function handleChat(req, res, apiKey, model) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -133,6 +211,15 @@ export default defineConfig(({ mode }) => {
               res,
               env.OPENAI_API_KEY,
               env.ALIVE_MODEL || 'gpt-6-luna'
+            );
+          });
+
+          server.middlewares.use('/api/transcribe', (req, res) => {
+            void handleTranscribe(
+              req,
+              res,
+              env.OPENAI_API_KEY,
+              env.ALIVE_TRANSCRIBE_MODEL || 'gpt-4o-mini-transcribe'
             );
           });
         }
