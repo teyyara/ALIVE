@@ -8,6 +8,7 @@ import { attachVisitorPresence } from './presence/visitor.js';
 import { createWorldController } from './world.js';
 import { localFallback, requestPresenceReply } from './presence/conversation.js';
 import { recordVoice, transcribeBlob } from './presence/recorder.js';
+import { createPresenceMemory } from './presence/memory.js';
 
 const app = document.querySelector('#app');
 
@@ -103,6 +104,8 @@ const voiceButton = document.querySelector('#voice');
 const listenButton = document.querySelector('#listen');
 const moodButton = document.querySelector('#mood');
 const scene = document.querySelector('.scene');
+
+const presenceMemory = createPresenceMemory();
 
 let activeState = 'idle';
 
@@ -356,3 +359,14 @@ window.addEventListener('beforeunload', () => {
 setInterval(tick, 1000);
 tick();
 setState('idle');
+
+if (presenceMemory.returning) {
+  window.setTimeout(() => {
+    addBubble('alive', 'You came back.');
+    setState('warm');
+
+    window.setTimeout(() => {
+      if (getState() === 'warm') setState('idle');
+    }, 2200);
+  }, 700);
+}
