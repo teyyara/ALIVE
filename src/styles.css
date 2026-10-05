@@ -134,6 +134,7 @@ button { color: inherit; }
   pointer-events: none;
   will-change: transform;
   transform-origin: 50% 42%;
+  translate: var(--attention-x, 0px) var(--attention-y, 0px);
   -webkit-mask-image: radial-gradient(ellipse at 50% 35%, #000 18%, rgba(0,0,0,.9) 30%, rgba(0,0,0,.48) 43%, transparent 56%);
   mask-image: radial-gradient(ellipse at 50% 35%, #000 18%, rgba(0,0,0,.9) 30%, rgba(0,0,0,.48) 43%, transparent 56%);
   animation: alive-head 7.4s ease-in-out infinite;
@@ -319,3 +320,12 @@ button { color: inherit; }
 }
 
 html[data-lab="1"] .portrait-breath { animation: none; transform: translateY(-.7px) scale(1.003); }
+
+.alive[data-state="listening"] .portrait-breath { animation-duration: 8.8s; }
+.alive[data-state="speaking"] .portrait-breath { animation: alive-speaking-body 1.55s ease-in-out infinite; }
+@keyframes alive-speaking-body {
+  0%, 100% { transform: translate3d(0,0,0) scale(1); }
+  34% { transform: translate3d(0,-2.8px,0) scale(1.009); }
+  58% { transform: translate3d(0,-1.2px,0) scale(1.004); }
+  78% { transform: translate3d(0,-2px,0) scale(1.007); }
+}
