@@ -1,4 +1,4 @@
-const MAX_AUDIO_BYTES = 8 * 1024 * 1024;
+const MAX_AUDIO_BYTES = 3.5 * 1024 * 1024;
 const ALLOWED_MIME_TYPES = new Map([
   ['audio/webm', 'audio.webm'],
   ['audio/webm;codecs=opus', 'audio.webm'],
