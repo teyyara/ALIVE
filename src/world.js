@@ -2,7 +2,8 @@ export function createWorldController({ scene }) {
   let timeout;
 
   function updateTime() {
-    const hour = new Date().getHours();
+    const now = new Date();
+    const hour = now.getHours();
     const phase =
       hour >= 6 && hour < 11 ? 'morning' :
       hour >= 11 && hour < 17 ? 'afternoon' :
@@ -10,6 +11,20 @@ export function createWorldController({ scene }) {
       'night';
 
     scene.dataset.time = phase;
+  }
+
+
+  function moonPhase(date) {
+    const reference = Date.UTC(2000, 0, 6, 18, 14);
+    const cycle = 29.530588853;
+    const days = (date.getTime() - reference) / 86_400_000;
+    return ((days % cycle) + cycle) % cycle / cycle;
+  }
+
+  function updateMoon() {
+    const phase = moonPhase(new Date());
+    const index = Math.round(phase * 8) % 8;
+    scene.dataset.moon = String(index);
   }
 
   function visitorArrived() {
@@ -21,7 +36,11 @@ export function createWorldController({ scene }) {
   }
 
   updateTime();
-  const clock = window.setInterval(updateTime, 60_000);
+  updateMoon();
+  const clock = window.setInterval(() => {
+    updateTime();
+    updateMoon();
+  }, 60_000);
 
   return {
     visitorArrived,
