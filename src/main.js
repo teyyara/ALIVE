@@ -262,7 +262,7 @@ if (labMode) {
   const [gx, gy] = gazeMap[labGaze] || gazeMap.center;
   character.setAttention(gx, gy);
 
-  if (validLabState === 'blink') {
+  if (labState === 'blink') {
     window.setTimeout(() => character.blink(), 260);
   }
 
