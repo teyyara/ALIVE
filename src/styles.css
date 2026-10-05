@@ -823,6 +823,10 @@ button { color: inherit; }
   border-radius: 34px;
 }
 
+.living-portrait {
+  cursor: default;
+}
+
 .identity-portrait {
   position: absolute;
   inset: 0;
@@ -1308,5 +1312,24 @@ button { color: inherit; }
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+
+.living-portrait {
+  image-rendering: auto;
+}
+
+.living-portrait.portrait-fallback {
+  filter: saturate(.82) contrast(.96) brightness(.83);
+}
+
+.living-portrait:not(.portrait-fallback) {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .living-portrait {
+    animation: none !important;
   }
 }
