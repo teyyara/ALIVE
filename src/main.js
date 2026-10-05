@@ -443,6 +443,11 @@ message.addEventListener('focus', () => {
 }, { passive: true });
 
 message.addEventListener('input', () => {
+  if (getState() === 'speaking') {
+    voice.stop();
+    setState('listening');
+  }
+
   scene.classList.add('keyboard-present');
   world.visitorArrived();
 
