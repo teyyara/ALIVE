@@ -202,6 +202,41 @@ button { color: inherit; }
   animation-duration: 5.2s;
 }
 
+.returning .halo {
+  animation: return-halo 2.4s ease-in-out;
+}
+
+.returning .portrait-frame {
+  animation: return-presence 2.4s ease-in-out;
+}
+
+.returning .window {
+  animation: return-window 2.4s ease-in-out;
+}
+
+.returning .ambient-a,
+.returning .ambient-b {
+  opacity: .24;
+}
+
+@keyframes return-halo {
+  0% { transform: scale(.97); opacity: .45; }
+  35% { transform: scale(1.055); opacity: .98; }
+  100% { transform: scale(1); opacity: .68; }
+}
+
+@keyframes return-presence {
+  0% { opacity: .72; transform: translateY(4px) scale(.994); }
+  35% { opacity: 1; transform: translateY(0) scale(1.006); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes return-window {
+  0% { filter: brightness(.92); }
+  35% { filter: brightness(1.06); }
+  100% { filter: brightness(1); }
+}
+
 .visitor-present .world::before {
   background:
     linear-gradient(180deg, rgba(0,0,0,.06), rgba(0,0,0,.34) 72%, rgba(0,0,0,.7)),
