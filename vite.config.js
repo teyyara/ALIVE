@@ -82,7 +82,7 @@ async function handleTranscribe(req, res, apiKey, model) {
   let buffer;
 
   try {
-    buffer = await readBuffer(req, 8_000_000);
+    buffer = await readBuffer(req, 3_500_000);
   } catch {
     return sendJson(res, 400, { error: 'The microphone recording was too large or malformed.' });
   }
