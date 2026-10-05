@@ -490,6 +490,38 @@ button { color: inherit; }
 .attention-glint.left { left: 37.5%; }
 .attention-glint.right { left: 62.5%; }
 
+.portrait-blink {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 28%;
+  height: 15%;
+  border-radius: 50%;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(28, 20, 18, .06) 35%,
+    rgba(28, 20, 18, .13) 50%,
+    rgba(28, 20, 18, .04) 65%,
+    transparent 100%
+  );
+  opacity: 0;
+  transform: scaleY(1);
+  transform-origin: 50% 50%;
+}
+
+.blink .portrait-blink {
+  animation: portrait-blink .18s ease-in-out;
+}
+
+[data-state="listening"] .portrait-frame {
+  transform: rotate(-.28deg) translateY(1px);
+}
+
+[data-state="thinking"] .portrait-frame {
+  transform: rotate(.22deg) translateY(-1px);
+}
+
 .attention-held .portrait-attention {
   opacity: .9;
 }
@@ -871,6 +903,11 @@ button { color: inherit; }
 @keyframes blink {
   0%, 100% { transform: scaleY(1); }
   46%, 60% { transform: scaleY(.05); }
+}
+
+@keyframes portrait-blink {
+  0%, 100% { opacity: 0; transform: scaleY(1); }
+  45%, 62% { opacity: .55; transform: scaleY(.32); }
 }
 
 @keyframes pulse {
