@@ -55,6 +55,9 @@ export function createLivingCharacter(canvas) {
   let targetY = 0;
   let gazeX = 0;
   let gazeY = 0;
+  let autonomousX = 0;
+  let autonomousY = 0;
+  let autonomousTimer = 0;
   let blink = 0;
   let blinkTarget = 0;
   let state = 'idle';
@@ -90,6 +93,17 @@ export function createLivingCharacter(canvas) {
   function setAttention(x, y) {
     targetX = clamp(Number(x) || 0, -1, 1);
     targetY = clamp(Number(y) || 0, -1, 1);
+  }
+
+  function scheduleAutonomousGaze(now) {
+    if (destroyed) return;
+    autonomousTimer = window.setTimeout(() => {
+      if (destroyed) return;
+
+      autonomousX = (Math.random() * 2 - 1) * .22;
+      autonomousY = (Math.random() * 2 - 1) * .14;
+      scheduleAutonomousGaze(now + 1);
+    }, 4200 + Math.random() * 5200);
   }
 
   function blinkNow() {
@@ -212,8 +226,12 @@ export function createLivingCharacter(canvas) {
     if (destroyed) return;
     resize();
 
-    gazeX += (targetX - gazeX) * .10;
-    gazeY += (targetY - gazeY) * .10;
+    const activeX = Math.abs(targetX) > .06 || Math.abs(targetY) > .06;
+    const desiredX = activeX ? targetX : autonomousX;
+    const desiredY = activeX ? targetY : autonomousY;
+
+    gazeX += (desiredX - gazeX) * .085;
+    gazeY += (desiredY - gazeY) * .085;
     blink += (blinkTarget - blink) * .40;
     voicePulse *= .90;
 
@@ -280,6 +298,7 @@ export function createLivingCharacter(canvas) {
     .catch((error) => console.error('[ALIVE] character asset error', error));
 
   frameId = requestAnimationFrame(frame);
+  scheduleAutonomousGaze(0);
   setState('idle');
 
   return {
@@ -290,6 +309,7 @@ export function createLivingCharacter(canvas) {
     destroy() {
       destroyed = true;
       window.cancelAnimationFrame(frameId);
+      window.clearTimeout(autonomousTimer);
     }
   };
 }
