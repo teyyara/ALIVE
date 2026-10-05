@@ -8,7 +8,9 @@ const ASSETS = {
   rightIris: '/assets/alive-iris-right.webp',
   leftBrow: '/assets/alive-brow-left.webp',
   rightBrow: '/assets/alive-brow-right.webp',
-  mouth: '/assets/alive-mouth.webp'
+  mouth: '/assets/alive-mouth.webp',
+  closedLeft: '/assets/alive-closed-left.webp',
+  closedRight: '/assets/alive-closed-right.webp'
 };
 
 const POSITIONS = {
@@ -21,7 +23,9 @@ const POSITIONS = {
   rightIris: [500, 275],
   leftBrow: [382, 270],
   rightBrow: [508, 270],
-  mouth: [420, 405]
+  mouth: [420, 405],
+  closedLeft: [405, 326],
+  closedRight: [531, 331]
 };
 
 const LANDMARKS = {
@@ -73,8 +77,6 @@ export function createLivingCharacter(canvas) {
   let scale = 1;
   let offsetX = 0;
   let offsetY = 0;
-  let skinLeft = [217, 161, 143];
-  let skinRight = [205, 145, 131];
 
   const target = { smile: .08, brow: 0, head: 0, breath: 0 };
   const current = { smile: .08, brow: 0, head: 0, breath: 0 };
@@ -152,29 +154,19 @@ export function createLivingCharacter(canvas) {
     offsetY = (height - 842 * scale) * .5;
   }
 
-  function drawLayer(
-    name,
-    dx = 0,
-    dy = 0,
-    sx = 1,
-    sy = 1,
-    rotation = 0,
-    alpha = 1,
-    pivotX = 510,
-    pivotY = 421
-  ) {
+  function drawLayer(name, dx = 0, dy = 0, sx = 1, sy = 1, rotation = 0, alpha = 1) {
     const image = images[name];
     if (!image) return;
 
-    const x = offsetX + dx * scale;
-    const y = offsetY + dy * scale;
+    const [baseX, baseY] = POSITIONS[name];
+    const x = offsetX + (baseX + dx) * scale;
+    const y = offsetY + (baseY + dy) * scale;
 
     context.save();
     context.globalAlpha = alpha;
-    context.translate(x + pivotX * scale, y + pivotY * scale);
+    context.translate(x, y);
     context.rotate(rotation);
     context.scale(sx, sy);
-    context.translate(-pivotX * scale, -pivotY * scale);
     context.drawImage(
       image,
       0,
@@ -185,57 +177,7 @@ export function createLivingCharacter(canvas) {
     context.restore();
   }
 
-  function sampleSkinColors() {
-    const sampler = document.createElement('canvas');
-    sampler.width = images.base.naturalWidth;
-    sampler.height = images.base.naturalHeight;
-    const sampleContext = sampler.getContext('2d', { willReadFrequently: true });
-    sampleContext.drawImage(images.base, 0, 0);
 
-    const average = (cx, cy) => {
-      const size = 24;
-      const data = sampleContext.getImageData(cx - size / 2, cy - size / 2, size, size).data;
-      let r = 0; let g = 0; let b = 0; let count = 0;
-      for (let i = 0; i < data.length; i += 4) {
-        const rr = data[i]; const gg = data[i + 1]; const bb = data[i + 2];
-        if (rr > 55 && gg > 35 && bb > 30) {
-          r += rr; g += gg; b += bb; count += 1;
-        }
-      }
-      return count ? [Math.round(r / count), Math.round(g / count), Math.round(b / count)] : [215, 160, 143];
-    };
-
-    skinLeft = average(438, 346);
-    skinRight = average(563, 350);
-  }
-
-  function drawClosedEye(cx, cy, skin) {
-    const x = offsetX + cx * scale;
-    const y = offsetY + cy * scale;
-    const [r, g, b] = skin;
-
-    context.save();
-    context.translate(x, y);
-    context.globalAlpha = Math.min(.96, blink);
-
-    const gradient = context.createRadialGradient(0, -1 * scale, 5 * scale, 0, 0, 34 * scale);
-    gradient.addColorStop(0, `rgba(${r + 8},${g + 8},${b + 8},.98)`);
-    gradient.addColorStop(.72, `rgba(${r},${g},${b},.96)`);
-    gradient.addColorStop(1, `rgba(${Math.max(0, r - 8)},${Math.max(0, g - 7)},${Math.max(0, b - 6)},.28)`);
-    context.fillStyle = gradient;
-    context.beginPath();
-    context.ellipse(0, 0, 37 * scale, 18 * scale, 0, 0, Math.PI * 2);
-    context.fill();
-
-    context.strokeStyle = 'rgba(71, 40, 38, .62)';
-    context.lineWidth = Math.max(1.2, 1.9 * scale);
-    context.lineCap = 'round';
-    context.beginPath();
-    context.moveTo(-25 * scale, 2 * scale);
-    context.quadraticCurveTo(0, -5 * scale, 25 * scale, 2 * scale);
-    context.stroke();
-    context.restore();
-  }
 
   function frame(timeMs) {
     if (destroyed) return;
@@ -277,7 +219,7 @@ export function createLivingCharacter(canvas) {
     context.imageSmoothingQuality = 'high';
 
     drawLayer('base');
-    drawLayer('body', 0, bodyY, 1, 1 + breath * .003, 0, 1, 510, 690);
+    drawLayer('body', 0, bodyY, 1, 1 + breath * .004, 0, 1);
     drawLayer('face', headX, headY, 1, 1, current.head * .0032 + (headSettleX * .0007), 1, 510, 400);
 
     const eyeY = headY;
@@ -301,8 +243,37 @@ export function createLivingCharacter(canvas) {
     drawLayer('mouth', headX * .55, eyeY + mouthLift, 1 + current.smile * .032, 1 + mouthOpen, current.head * .002, 1, 510, 465);
 
     if (blink > .02) {
-      drawClosedEye(LANDMARKS.leftEye[0] + headX, LANDMARKS.leftEye[1] + headY, skinLeft);
-      drawClosedEye(LANDMARKS.rightEye[0] + headX, LANDMARKS.rightEye[1] + headY, skinRight);
+      drawLayer('closedLeft', headX, eyeY, 1, 1, current.head * .003, blink);
+      drawLayer('closedRight', headX, eyeY, 1, 1, current.head * .003, blink);
+
+      context.save();
+      context.globalAlpha = Math.min(.92, blink);
+      context.strokeStyle = 'rgba(69, 39, 37, .62)';
+      context.lineWidth = Math.max(1.1, 1.8 * scale);
+      context.lineCap = 'round';
+
+      const leftLineX = offsetX + (POSITIONS.closedLeft[0] + headX + 7) * scale;
+      const leftLineY = offsetY + (POSITIONS.closedLeft[1] + eyeY + 17) * scale;
+      const rightLineX = offsetX + (POSITIONS.closedRight[0] + headX + 7) * scale;
+      const rightLineY = offsetY + (POSITIONS.closedRight[1] + eyeY + 17) * scale;
+
+      context.beginPath();
+      context.moveTo(leftLineX, leftLineY);
+      context.quadraticCurveTo(
+        leftLineX + 27 * scale,
+        leftLineY - 3 * scale,
+        leftLineX + 54 * scale,
+        leftLineY
+      );
+      context.moveTo(rightLineX, rightLineY);
+      context.quadraticCurveTo(
+        rightLineX + 27 * scale,
+        rightLineY - 3 * scale,
+        rightLineX + 54 * scale,
+        rightLineY
+      );
+      context.stroke();
+      context.restore();
     }
 
     frameId = requestAnimationFrame(frame);
@@ -312,7 +283,6 @@ export function createLivingCharacter(canvas) {
     .then((entries) => {
       if (destroyed) return;
       images = Object.fromEntries(entries);
-      sampleSkinColors();
       loaded = true;
     })
     .catch((error) => console.error('[ALIVE] character asset error', error));
