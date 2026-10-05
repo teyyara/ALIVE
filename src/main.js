@@ -93,7 +93,6 @@ app.innerHTML = `
     <div class="tools">
       <button class="ghost" id="voice" aria-pressed="false">Voice</button>
       <button class="ghost" id="listen">Listen</button>
-      <button class="ghost" id="mood">Change the atmosphere</button>
     </div>
   </section>
 
@@ -114,7 +113,6 @@ const composer = document.querySelector('#composer');
 const message = document.querySelector('#message');
 const voiceButton = document.querySelector('#voice');
 const listenButton = document.querySelector('#listen');
-const moodButton = document.querySelector('#mood');
 const scene = document.querySelector('.scene');
 const livingPortraitCanvas = document.querySelector('#living-portrait');
 const livingPortrait = createLivingPortrait(livingPortraitCanvas, '/assets/alive-portrait.jpg');
@@ -469,71 +467,6 @@ listenButton.addEventListener('click', async () => {
       setState('curious');
     }
   }
-});
-
-const atmospheres = ['curious', 'warm', 'playful', 'thinking', 'listening'];
-let atmosphereIndex = Math.max(
-  0,
-  atmospheres.indexOf(readPreference(MOOD_PREFERENCE_KEY, 'curious'))
-);
-
-let typingTimer;
-
-message.addEventListener('focus', () => {
-  scene.classList.add('keyboard-present');
-  world.visitorArrived();
-
-  if (getState() === 'idle') setState('warm');
-}, { passive: true });
-
-message.addEventListener('input', () => {
-  if (getState() === 'speaking') {
-    voice.stop();
-    setState('listening');
-  }
-
-  if (
-    (getState() === 'thinking' || getState() === 'speaking') &&
-    activeConversationController
-  ) {
-    window.clearTimeout(replyTimer);
-    activeConversationController.abort();
-    activeConversationController = null;
-    activeConversationToken += 1;
-    setState('listening');
-  }
-
-  scene.classList.add('keyboard-present');
-  world.visitorArrived();
-
-  if (getState() === 'idle' || getState() === 'warm') {
-    setState('curious');
-  }
-
-  window.clearTimeout(typingTimer);
-  typingTimer = window.setTimeout(() => {
-    scene.classList.remove('keyboard-present');
-
-    if (getState() === 'curious') {
-      setState('warm');
-    }
-  }, 1800);
-});
-
-message.addEventListener('blur', () => {
-  window.clearTimeout(typingTimer);
-  scene.classList.remove('keyboard-present');
-
-  if (getState() === 'curious' && !scene.classList.contains('attention-held')) {
-    setState('warm');
-  }
-}, { passive: true });
-
-moodButton.addEventListener('click', () => {
-  atmosphereIndex = (atmosphereIndex + 1) % atmospheres.length;
-  const atmosphere = atmospheres[atmosphereIndex];
-  writePreference(MOOD_PREFERENCE_KEY, atmosphere);
-  setState(atmosphere);
 });
 
 document.querySelector('#brand').addEventListener('click', () => {
