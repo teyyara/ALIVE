@@ -53,7 +53,6 @@ export function createLivingCharacter(canvas) {
   let settleTargetX = 0;
   let settleTargetY = 0;
 
-  let voicePulse = 0;
 
   const stateTargets = {
     idle: { smile: 0, thought: 0 },
@@ -87,10 +86,6 @@ export function createLivingCharacter(canvas) {
     blinkTimer = window.setTimeout(() => {
       blinkTarget = 0;
     }, 105);
-  }
-
-  function speechPulse() {
-    voicePulse = Math.min(1, voicePulse + .78);
   }
 
   function scheduleGaze() {
@@ -284,7 +279,6 @@ export function createLivingCharacter(canvas) {
     settleX += (settleTargetX - settleX) * .022;
     settleY += (settleTargetY - settleY) * .022;
     blink += (blinkTarget - blink) * .36;
-    voicePulse *= .90;
 
     expression.smile += (expressionTarget.smile - expression.smile) * .075;
     expression.thought += (expressionTarget.thought - expression.thought) * .075;
@@ -348,7 +342,6 @@ export function createLivingCharacter(canvas) {
     setAttention,
     setState,
     blink: blinkNow,
-    speechPulse,
 
     destroy() {
       destroyed = true;
