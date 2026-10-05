@@ -41,7 +41,7 @@ The server-side route uses `store: false` and receives only the recent conversat
 
 ## Current experience
 
-The first presence layer is now intentionally useful even without API credits. The browser handles pointer attention, sustained attention, typing engagement, visitor presence, local microphone recording and level sensing, voice output, ambient response, and small local conversational fallbacks. Paid services are isolated behind server-side endpoints.
+The first presence layer is now intentionally useful even without API credits. The browser handles pointer attention, subtle idle gaze drift, sustained attention, typing engagement, visitor presence, local microphone recording and level sensing, voice output, ambient response, and small local conversational fallbacks. Paid services are isolated behind server-side endpoints.
 
 When API credits are unavailable, ALIVE stops retrying the paid mind/transcription path for the current session and remains responsive locally rather than becoming a broken shell.
 
