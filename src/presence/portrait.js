@@ -156,7 +156,7 @@ function createProgram(gl) {
   return program;
 }
 
-export function createLivingPortrait(canvas, src) {
+export function createLivingPortrait(canvas, src, { fallbackSrc } = {}) {
   let destroyed = false;
   let raf = 0;
   let blinkTarget = 0;
@@ -176,6 +176,7 @@ export function createLivingPortrait(canvas, src) {
   let fallbackContext = null;
   let image = null;
   let uniforms = null;
+  let usingFallbackSource = false;
 
   const render = (timeMs) => {
     if (destroyed) return;
@@ -199,17 +200,20 @@ export function createLivingPortrait(canvas, src) {
       gl.uniform1f(uniforms.speech, speech);
       gl.uniform1f(uniforms.ready, ready);
 
-      gl.uniform4f(uniforms.crop, 0.15, 0.02, 0.65, 0.86);
+      const crop = usingFallbackSource
+        ? [0.15, 0.02, 0.65, 0.86]
+        : [0, 0, 1, 1];
+      gl.uniform4f(uniforms.crop, crop[0], crop[1], crop[2], crop[3]);
       gl.uniform1f(uniforms.viewAspect, canvas.width / Math.max(1, canvas.height));
 
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     } else if (fallbackContext && image?.complete) {
       resizeCanvas();
       fallbackContext.clearRect(0, 0, canvas.width, canvas.height);
-      const sourceX = image.width * 0.15;
-      const sourceY = image.height * 0.02;
-      const sourceWidth = image.width * 0.65;
-      const sourceHeight = image.height * 0.86;
+      const sourceX = usingFallbackSource ? image.width * 0.15 : 0;
+      const sourceY = usingFallbackSource ? image.height * 0.02 : 0;
+      const sourceWidth = usingFallbackSource ? image.width * 0.65 : image.width;
+      const sourceHeight = usingFallbackSource ? image.height * 0.86 : image.height;
       const sourceAspect = sourceWidth / sourceHeight;
       const viewAspect = canvas.width / Math.max(1, canvas.height);
       const drawWidth = sourceAspect > viewAspect ? canvas.height * sourceAspect : canvas.width;
@@ -331,6 +335,12 @@ export function createLivingPortrait(canvas, src) {
     };
 
     image.onerror = () => {
+      if (!usingFallbackSource && fallbackSrc) {
+        usingFallbackSource = true;
+        image.src = fallbackSrc;
+        return;
+      }
+
       canvas.classList.add('portrait-fallback');
     };
 
