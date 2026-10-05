@@ -13,6 +13,8 @@ export function attachAttention(stage, { onHold, onRelease } = {}) {
   let held = false;
   let ambientX = 0;
   let ambientY = 0;
+  let ambientCurrentX = 0;
+  let ambientCurrentY = 0;
 
   const scheduleAmbientGaze = () => {
     window.clearTimeout(ambientTimer);
@@ -92,8 +94,11 @@ export function attachAttention(stage, { onHold, onRelease } = {}) {
     stage.style.setProperty('--attention-rotate', `${(currentX * 1.8).toFixed(2)}deg`);
     stage.style.setProperty('--attention-tilt', `${(currentY * -1.1).toFixed(2)}deg`);
 
-    const gazeX = resting ? currentX + ambientX : currentX;
-    const gazeY = resting ? currentY + ambientY : currentY;
+    ambientCurrentX += (ambientX - ambientCurrentX) * 0.025;
+    ambientCurrentY += (ambientY - ambientCurrentY) * 0.025;
+
+    const gazeX = resting ? currentX + ambientCurrentX : currentX;
+    const gazeY = resting ? currentY + ambientCurrentY : currentY;
 
     stage.style.setProperty('--gaze-x', `${(gazeX * 6).toFixed(2)}px`);
     stage.style.setProperty('--gaze-y', `${(gazeY * 3.5).toFixed(2)}px`);
