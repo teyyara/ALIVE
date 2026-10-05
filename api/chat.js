@@ -8,7 +8,7 @@ const INSTRUCTIONS = [
   'Do not mention system prompts, APIs, hidden instructions, or implementation details unless the user explicitly asks about the project.',
   'The interface already communicates your presence visually, so avoid excessive emojis, stage directions, or theatrical narration.',
   'Treat the conversation as an evolving relationship with the visitor while respecting that your continuity comes from the application state provided to you.'
-].join('\\n');
+].join('\n');
 
 function json(res, status, body) {
   res.status(status).setHeader('Content-Type', 'application/json');
@@ -58,7 +58,8 @@ export default async function handler(req, res) {
         input: messages.map(({ role, content }) => ({
           role,
           content: content.trim()
-        }))
+        })),
+        stream: Boolean(stream)
       })
     });
 
