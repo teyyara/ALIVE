@@ -54,6 +54,7 @@ app.innerHTML = `
             alt="ALIVE"
           />
           <span class="portrait-depth-veil" aria-hidden="true"></span>
+          <span class="portrait-expression-light" aria-hidden="true"></span>
           <div class="portrait-attention" aria-hidden="true">
             <span class="attention-glint left"></span>
             <span class="attention-glint right"></span>
