@@ -1,34 +1,15 @@
 const ASSETS = {
-  body: '/assets/alive-body.webp',
-  face: '/assets/alive-face.webp',
-  leftEye: '/assets/alive-eye-left-base.webp',
-  rightEye: '/assets/alive-eye-right-base.webp',
+  portrait: '/assets/alive-clean-portrait.webp',
   leftIris: '/assets/alive-iris-left.webp',
-  rightIris: '/assets/alive-iris-right.webp',
-  leftBrow: '/assets/alive-brow-left.webp',
-  rightBrow: '/assets/alive-brow-right.webp',
-  mouth: '/assets/alive-mouth.webp',
-  closedLeft: '/assets/alive-closed-left.webp',
-  closedRight: '/assets/alive-closed-right.webp'
+  rightIris: '/assets/alive-iris-right.webp'
 };
 
-const POSITIONS = {
-  body: [70, 450],
-  face: [260, 110],
-  leftEye: [370, 270],
-  rightEye: [500, 275],
-  leftIris: [370, 270],
-  rightIris: [500, 275],
-  leftBrow: [382, 270],
-  rightBrow: [508, 270],
-  mouth: [420, 405],
-  closedLeft: [405, 326],
-  closedRight: [531, 331]
-};
+const DESIGN_WIDTH = 1020;
+const DESIGN_HEIGHT = 842;
 
-const LANDMARKS = {
-  leftEye: [438, 326],
-  rightEye: [563, 330]
+const EYES = {
+  left: { x: 438, y: 326 },
+  right: { x: 563, y: 330 }
 };
 
 function loadImage(src) {
@@ -36,288 +17,321 @@ function loadImage(src) {
     const image = new Image();
     image.decoding = 'async';
     image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error(`Could not load ALIVE layer: ${src}`));
+    image.onerror = () => reject(new Error(`Could not load ALIVE asset: ${src}`));
     image.src = src;
   });
 }
 
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
-}
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
 export function createLivingCharacter(canvas) {
-  const context = canvas.getContext('2d');
-  if (!context) throw new Error('Canvas 2D is unavailable.');
+  const ctx = canvas.getContext('2d', { alpha: true });
+  if (!ctx) throw new Error('ALIVE requires Canvas 2D.');
 
   let destroyed = false;
-  let frameId = 0;
-  let images = null;
+  let raf = 0;
+  let assets = null;
   let loaded = false;
-  let targetX = 0;
-  let targetY = 0;
+
+  let targetGazeX = 0;
+  let targetGazeY = 0;
   let gazeX = 0;
   let gazeY = 0;
-  let autonomousX = 0;
-  let autonomousY = 0;
-  let stateGazeX = 0;
-  let stateGazeY = 0;
-  let autonomousTimer = 0;
+
   let blink = 0;
   let blinkTarget = 0;
+  let blinkTimer = 0;
+
   let state = 'idle';
-  let voicePulse = 0;
   let breathTime = Math.random() * Math.PI * 2;
-  let headSettleX = 0;
-  let headSettleY = 0;
+  let gazeTimer = 0;
+  let settleTimer = 0;
+  let settleX = 0;
+  let settleY = 0;
   let settleTargetX = 0;
   let settleTargetY = 0;
-  let settleTimer = 0;
-  let width = 0;
-  let height = 0;
-  let scale = 1;
-  let offsetX = 0;
-  let offsetY = 0;
 
-  const target = { smile: .08, brow: 0, head: 0, breath: 0 };
-  const current = { smile: .08, brow: 0, head: 0, breath: 0 };
+  let voicePulse = 0;
 
   const stateTargets = {
-    idle: { smile: .08, brow: 0, head: 0, breath: 0 },
-    attentive: { smile: .12, brow: .08, head: -.4, breath: .05 },
-    listening: { smile: .08, brow: .04, head: -.7, breath: .12 },
-    thinking: { smile: -.02, brow: -.16, head: .75, breath: -.04 },
-    speaking: { smile: .14, brow: .02, head: .12, breath: .18 },
-    warm: { smile: .28, brow: .02, head: .16, breath: .10 },
-    curious: { smile: .16, brow: .34, head: -.7, breath: .14 },
-    playful: { smile: .42, brow: .25, head: -1.0, breath: .20 }
+    idle: { smile: 0, thought: 0 },
+    attentive: { smile: .02, thought: 0 },
+    listening: { smile: .01, thought: -.02 },
+    thinking: { smile: -.01, thought: .12 },
+    speaking: { smile: .03, thought: 0 },
+    warm: { smile: .10, thought: -.01 },
+    curious: { smile: .04, thought: -.05 },
+    playful: { smile: .16, thought: -.04 }
   };
 
-  const stateGazeBias = {
-    idle: [0, 0],
-    attentive: [0, -0.02],
-    listening: [0, 0],
-    thinking: [-0.10, -0.08],
-    speaking: [0, 0],
-    warm: [0.02, 0],
-    curious: [0.05, -0.04],
-    playful: [0.08, -0.01]
-  };
+  const expression = { smile: 0, thought: 0 };
+  const expressionTarget = { smile: 0, thought: 0 };
 
   function setState(next) {
     state = stateTargets[next] ? next : 'idle';
-    Object.assign(target, stateTargets[state]);
-    [stateGazeX, stateGazeY] = stateGazeBias[state] || [0, 0];
+    Object.assign(expressionTarget, stateTargets[state]);
   }
 
   function setAttention(x, y) {
-    targetX = clamp(Number(x) || 0, -1, 1);
-    targetY = clamp(Number(y) || 0, -1, 1);
-  }
-
-  function scheduleAutonomousGaze() {
-    if (destroyed) return;
-    autonomousTimer = window.setTimeout(() => {
-      if (destroyed) return;
-
-      autonomousX = (Math.random() * 2 - 1) * .22;
-      autonomousY = (Math.random() * 2 - 1) * .14;
-      scheduleAutonomousGaze();
-    }, 4200 + Math.random() * 5200);
-  }
-
-  function scheduleHeadSettle() {
-    if (destroyed) return;
-    window.clearTimeout(settleTimer);
-    settleTimer = window.setTimeout(() => {
-      settleTargetX = (Math.random() * 2 - 1) * .65;
-      settleTargetY = (Math.random() * 2 - 1) * .28;
-      scheduleHeadSettle();
-    }, 5200 + Math.random() * 6200);
+    targetGazeX = clamp(Number(x) || 0, -1, 1);
+    targetGazeY = clamp(Number(y) || 0, -1, 1);
   }
 
   function blinkNow() {
     if (destroyed) return;
+
     blinkTarget = 1;
-    window.setTimeout(() => {
-      if (!destroyed) blinkTarget = 0;
-    }, 115);
+    window.clearTimeout(blinkTimer);
+    blinkTimer = window.setTimeout(() => {
+      blinkTarget = 0;
+    }, 105);
   }
 
-  function pulseVoice() {
-    voicePulse = Math.min(1, voicePulse + .7);
+  function speechPulse() {
+    voicePulse = Math.min(1, voicePulse + .78);
+  }
+
+  function scheduleGaze() {
+    window.clearTimeout(gazeTimer);
+    if (destroyed || document.hidden) return;
+
+    gazeTimer = window.setTimeout(() => {
+      settleTargetX = (Math.random() * 2 - 1) * .12;
+      settleTargetY = (Math.random() * 2 - 1) * .07;
+      scheduleGaze();
+    }, 4300 + Math.random() * 6200);
+  }
+
+  function scheduleSettle() {
+    window.clearTimeout(settleTimer);
+    if (destroyed || document.hidden) return;
+
+    settleTimer = window.setTimeout(() => {
+      if (Math.abs(targetGazeX) < .06 && Math.abs(targetGazeY) < .06) {
+        settleTargetX = (Math.random() * 2 - 1) * .9;
+        settleTargetY = (Math.random() * 2 - 1) * .35;
+      }
+
+      scheduleSettle();
+    }, 6500 + Math.random() * 6500);
   }
 
   function resize() {
     const rect = canvas.getBoundingClientRect();
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const nextWidth = Math.max(1, Math.round(rect.width * dpr));
-    const nextHeight = Math.max(1, Math.round(rect.height * dpr));
-    if (canvas.width !== nextWidth || canvas.height !== nextHeight) {
-      canvas.width = nextWidth;
-      canvas.height = nextHeight;
-    }
-    width = nextWidth;
-    height = nextHeight;
 
-    const aspect = 1020 / 842;
+    const width = Math.max(1, Math.round(rect.width * dpr));
+    const height = Math.max(1, Math.round(rect.height * dpr));
+
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width;
+      canvas.height = height;
+    }
+
     const viewAspect = width / height;
-    scale = viewAspect > aspect ? height / 842 : width / 1020;
-    offsetX = (width - 1020 * scale) * .5;
-    offsetY = (height - 842 * scale) * .5;
+    const imageAspect = DESIGN_WIDTH / DESIGN_HEIGHT;
+
+    const scale = viewAspect > imageAspect
+      ? height / DESIGN_HEIGHT
+      : width / DESIGN_WIDTH;
+
+    return {
+      width,
+      height,
+      scale,
+      offsetX: (width - DESIGN_WIDTH * scale) * .5,
+      offsetY: (height - DESIGN_HEIGHT * scale) * .5
+    };
   }
 
-  function drawLayer(name, dx = 0, dy = 0, sx = 1, sy = 1, rotation = 0, alpha = 1) {
-    const image = images[name];
+  function mapDesignToCanvas(x, y, layout) {
+    return [
+      layout.offsetX + x * layout.scale,
+      layout.offsetY + y * layout.scale
+    ];
+  }
+
+  function drawPortrait(layout, breath) {
+    const image = assets.portrait;
+
+    const maxY = Math.min(DESIGN_HEIGHT, 520);
+    const startBreathY = 438;
+    const amplitude = 1.35 * breath;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(layout.offsetX, layout.offsetY, DESIGN_WIDTH * layout.scale, DESIGN_HEIGHT * layout.scale);
+    ctx.clip();
+
+    for (let y = 0; y < DESIGN_HEIGHT; y += 2) {
+      const local = clamp((y - startBreathY) / (maxY - startBreathY), 0, 1);
+      const weight = local * local * (3 - 2 * local);
+      const displacement = -amplitude * weight;
+
+      const sy = Math.max(0, Math.min(DESIGN_HEIGHT - 2, y - displacement));
+      const dy = y;
+
+      ctx.drawImage(
+        image,
+        0,
+        sy * image.naturalHeight / DESIGN_HEIGHT,
+        image.naturalWidth,
+        2 * image.naturalHeight / DESIGN_HEIGHT,
+        layout.offsetX,
+        layout.offsetY + dy * layout.scale,
+        DESIGN_WIDTH * layout.scale,
+        2 * layout.scale
+      );
+    }
+
+    ctx.restore();
+  }
+
+  function drawIris(image, eye, gaze, layout) {
     if (!image) return;
 
-    const [baseX, baseY] = POSITIONS[name];
-    const x = offsetX + (baseX + dx) * scale;
-    const y = offsetY + (baseY + dy) * scale;
+    const baseSize = 44;
+    const irisX = eye.x + gaze.x * 7.2;
+    const irisY = eye.y + gaze.y * 4.5;
 
-    context.save();
-    context.globalAlpha = alpha;
-    context.translate(x, y);
-    context.rotate(rotation);
-    context.scale(sx, sy);
-    context.drawImage(
-      image,
-      0,
-      0,
-      image.naturalWidth * scale,
-      image.naturalHeight * scale
-    );
-    context.restore();
+    const x = layout.offsetX + (irisX - baseSize / 2) * layout.scale;
+    const y = layout.offsetY + (irisY - baseSize / 2) * layout.scale;
+    const size = baseSize * layout.scale;
+
+    ctx.save();
+    ctx.globalAlpha = 1 - blink * .96;
+    ctx.drawImage(image, x, y, size, size);
+    ctx.restore();
   }
 
+  function drawBlinkLid(eye, layout) {
+    if (blink <= .01) return;
 
+    const [x, y] = mapDesignToCanvas(eye.x, eye.y + 2, layout);
+
+    ctx.save();
+    ctx.globalAlpha = Math.min(.84, blink);
+
+    const gradient = ctx.createRadialGradient(
+      x,
+      y - 3 * layout.scale,
+      1,
+      x,
+      y,
+      23 * layout.scale
+    );
+
+    gradient.addColorStop(0, 'rgba(223,170,145,.94)');
+    gradient.addColorStop(.72, 'rgba(205,142,123,.86)');
+    gradient.addColorStop(1, 'rgba(174,108,95,0)');
+
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.ellipse(
+      x,
+      y,
+      30 * layout.scale,
+      13 * layout.scale,
+      0,
+      0,
+      Math.PI * 2
+    );
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(70,40,38,.54)';
+    ctx.lineWidth = Math.max(1, 1.4 * layout.scale);
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x - 22 * layout.scale, y + 2 * layout.scale);
+    ctx.quadraticCurveTo(
+      x,
+      y - 3 * layout.scale,
+      x + 22 * layout.scale,
+      y + 2 * layout.scale
+    );
+    ctx.stroke();
+
+    ctx.restore();
+  }
 
   function frame(timeMs) {
     if (destroyed) return;
-    resize();
 
-    const activeX = Math.abs(targetX) > .06 || Math.abs(targetY) > .06;
-    const desiredX = activeX
-      ? targetX * .92 + stateGazeX * .08
-      : autonomousX + stateGazeX;
-    const desiredY = activeX
-      ? targetY * .92 + stateGazeY * .08
-      : autonomousY + stateGazeY;
+    const layout = resize();
 
-    const eyeEase = activeX ? .17 : .105;
-    gazeX += (desiredX - gazeX) * eyeEase;
-    gazeY += (desiredY - gazeY) * eyeEase;
-    headSettleX += (settleTargetX - headSettleX) * .025;
-    headSettleY += (settleTargetY - headSettleY) * .025;
-    blink += (blinkTarget - blink) * .40;
+    gazeX += (targetGazeX - gazeX) * .16;
+    gazeY += (targetGazeY - gazeY) * .16;
+    settleX += (settleTargetX - settleX) * .022;
+    settleY += (settleTargetY - settleY) * .022;
+    blink += (blinkTarget - blink) * .36;
     voicePulse *= .90;
 
-    for (const key of Object.keys(current)) {
-      current[key] += (target[key] - current[key]) * .07;
-    }
+    expression.smile += (expressionTarget.smile - expression.smile) * .075;
+    expression.thought += (expressionTarget.thought - expression.thought) * .075;
 
     const t = timeMs * .001;
     breathTime += .014;
-    const breath = .5 + .5 * Math.sin(breathTime * .9);
-    const featureX = gazeX * 0.85 + current.head * .12 + headSettleX * .20;
-    const featureY = gazeY * 0.55 + headSettleY * .14;
-    const breathPhase = breathTime * .9;
-    const leftShoulder = Math.sin(breathPhase) * .9;
-    const rightShoulder = Math.sin(breathPhase + .18) * .9;
-    const bodyY = -breath * (1.0 + current.breath * .9);
 
-    context.clearRect(0, 0, width, height);
+    const breath = .5 + .5 * Math.sin(breathTime * .92);
+    const effectiveX = Math.abs(targetGazeX) > .06 ? gazeX : gazeX * .45 + settleX;
+    const effectiveY = Math.abs(targetGazeY) > .06 ? gazeY : gazeY * .45 + settleY;
+
+    ctx.clearRect(0, 0, layout.width, layout.height);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
 
     if (!loaded) {
-      frameId = requestAnimationFrame(frame);
+      raf = requestAnimationFrame(frame);
       return;
     }
 
-    context.imageSmoothingEnabled = true;
-    context.imageSmoothingQuality = 'high';
+    drawPortrait(layout, breath);
 
-    drawLayer('body', 0, bodyY, 1, 1 + breath * .003, 0, 1);
-    drawLayer('face', headX, headY, 1, 1, current.head * .0032 + (headSettleX * .0007), 1, 510, 400);
+    drawIris(assets.leftIris, EYES.left, {
+      x: effectiveX,
+      y: effectiveY
+    }, layout);
 
-    const eyeY = featureY;
-    const irisX = gazeX * 7.2 + featureX;
-    const irisY = gazeY * 4.4 + eyeY;
+    drawIris(assets.rightIris, EYES.right, {
+      x: effectiveX,
+      y: effectiveY
+    }, layout);
 
-    const lidCompression = state === 'thinking' ? .985 : state === 'listening' ? .992 : 1;
-    drawLayer('leftEye', 0, 0, 1, lidCompression, 0, 1);
-    drawLayer('rightEye', 0, 0, 1, lidCompression, 0, 1);
-    const irisScale = state === 'curious' ? 1.012 : state === 'thinking' ? .996 : 1;
-    drawLayer('leftIris', irisX, irisY, irisScale, irisScale, 0, 1);
-    drawLayer('rightIris', irisX, irisY, irisScale, irisScale, 0, 1);
-
-    const browLift = current.brow * -3.5 - gazeY * .7;
-    drawLayer('leftBrow', featureX * .78 + leftShoulder * .05, browLift + eyeY, 1, 1, current.head * .002, 1);
-    drawLayer('rightBrow', featureX * .78 + rightShoulder * .05, browLift + eyeY, 1, 1, current.head * .002, 1);
-
-    const mouthOpen = state === 'speaking'
-      ? Math.abs(Math.sin(t * 13.5)) * .045 + voicePulse * .026
-      : voicePulse * .01;
-    const mouthLift = -current.smile * 2.3;
-    drawLayer('mouth', featureX * .42, mouthLift + eyeY, 1 + current.smile * .022, 1 + mouthOpen, current.head * .001, 1);
-
-    if (blink > .02) {
-      drawLayer('closedLeft', featureX, eyeY, 1, 1, current.head * .002, blink);
-      drawLayer('closedRight', featureX, eyeY, 1, 1, current.head * .002, blink);
-
-      context.save();
-      context.globalAlpha = Math.min(.92, blink);
-      context.strokeStyle = 'rgba(69, 39, 37, .62)';
-      context.lineWidth = Math.max(1.1, 1.8 * scale);
-      context.lineCap = 'round';
-
-      const leftLineX = offsetX + (POSITIONS.closedLeft[0] + featureX + 7) * scale;
-      const leftLineY = offsetY + (POSITIONS.closedLeft[1] + eyeY + 17) * scale;
-      const rightLineX = offsetX + (POSITIONS.closedRight[0] + featureX + 7) * scale;
-      const rightLineY = offsetY + (POSITIONS.closedRight[1] + eyeY + 17) * scale;
-
-      context.beginPath();
-      context.moveTo(leftLineX, leftLineY);
-      context.quadraticCurveTo(
-        leftLineX + 27 * scale,
-        leftLineY - 3 * scale,
-        leftLineX + 54 * scale,
-        leftLineY
-      );
-      context.moveTo(rightLineX, rightLineY);
-      context.quadraticCurveTo(
-        rightLineX + 27 * scale,
-        rightLineY - 3 * scale,
-        rightLineX + 54 * scale,
-        rightLineY
-      );
-      context.stroke();
-      context.restore();
+    if (blink > .01) {
+      drawBlinkLid(EYES.left, layout);
+      drawBlinkLid(EYES.right, layout);
     }
 
-    frameId = requestAnimationFrame(frame);
+    raf = requestAnimationFrame(frame);
   }
 
-  Promise.all(Object.entries(ASSETS).map(async ([name, src]) => [name, await loadImage(src)]))
+  Promise.all(
+    Object.entries(ASSETS).map(async ([name, src]) => [name, await loadImage(src)])
+  )
     .then((entries) => {
       if (destroyed) return;
-      images = Object.fromEntries(entries);
+      assets = Object.fromEntries(entries);
       loaded = true;
     })
-    .catch((error) => console.error('[ALIVE] character asset error', error));
+    .catch((error) => {
+      console.error('[ALIVE] character assets', error);
+    });
 
-  frameId = requestAnimationFrame(frame);
-  scheduleAutonomousGaze();
-  scheduleHeadSettle();
-  setState('idle');
+  raf = requestAnimationFrame(frame);
+  scheduleGaze();
+  scheduleSettle();
 
   return {
     setAttention,
     setState,
     blink: blinkNow,
-    speechPulse: pulseVoice,
+    speechPulse,
+
     destroy() {
       destroyed = true;
-      window.cancelAnimationFrame(frameId);
-      window.clearTimeout(autonomousTimer);
+      window.cancelAnimationFrame(raf);
+      window.clearTimeout(blinkTimer);
+      window.clearTimeout(gazeTimer);
       window.clearTimeout(settleTimer);
     }
   };
