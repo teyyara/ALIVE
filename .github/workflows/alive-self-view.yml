@@ -110,6 +110,13 @@ jobs:
               page.wait_for_timeout(1850)
               page.screenshot(path=str(body_b), clip=body_clip(page))
 
+              # Prove ambient micro-saccades appear when the visitor is still.
+              page.goto("http://127.0.0.1:4173/?lab=idle&gaze=center", wait_until="domcontentloaded")
+              page.wait_for_timeout(500)
+              page.screenshot(path=str(out / "eyes-ambient-a.png"), clip=eye_clip(page))
+              page.wait_for_timeout(2200)
+              page.screenshot(path=str(out / "eyes-ambient-b.png"), clip=eye_clip(page))
+
               # Deterministic blink capture, while the eyelid is actually moving.
               page.goto("http://127.0.0.1:4173/?lab=idle&gaze=center", wait_until="domcontentloaded")
               page.wait_for_timeout(450)
@@ -157,6 +164,7 @@ jobs:
               "gaze_eye_region_mean_difference": mean_diff,
               "blink_eye_region_mean_difference": blink_mean,
               "body_region_mean_difference": body_mean,
+              "ambient_eye_region_mean_difference": ambient_mean,
               "snapshots": len(list(out.glob("*.png"))),
           }
           Path("lab/latest/browser-errors.json").write_text(json.dumps(diagnostics, indent=2))
@@ -169,6 +177,8 @@ jobs:
               raise SystemExit(f"Eye-region blink difference is too small: {blink_mean}")
           if body_mean < 0.08:
               raise SystemExit(f"Body-region motion difference is too small: {body_mean}")
+          if ambient_mean < 0.03:
+              raise SystemExit(f"Ambient eye movement difference is too small: {ambient_mean}")
           if errors:
               raise SystemExit(f"Browser reported {len(errors)} errors/warnings.")
           PY
