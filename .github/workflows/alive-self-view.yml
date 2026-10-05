@@ -144,7 +144,7 @@ jobs:
               
               page.locator("#composer").evaluate("(form) => form.requestSubmit()")
               page.wait_for_selector("#messages .alive", timeout=2500)
-              if page.locator("#state-label").inner_text() != "Warm":
+              if page.locator("#state-label").inner_text().strip().lower() != "warm":
                   raise SystemExit(f"Conversation produced a response but did not settle Warm: {page.locator('#state-label').inner_text()}")
               
               page.screenshot(path=str(out / "interaction.png"), full_page=True)
