@@ -9,6 +9,10 @@ The room feels inhabited.
 - gaze toward the visitor
 - subtle posture and hair movement
 - ambient light and window response
+- visitor presence and movement sensing
+- sustained-attention response
+- typing-aware room response
+- return-from-absence continuity cue
 - accessible reduced-motion mode
 
 ## 02 — Identity
