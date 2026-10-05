@@ -199,8 +199,8 @@ export function createLivingCharacter(canvas) {
     const t = timeMs * .001;
     breathTime += .014;
     const breath = .5 + .5 * Math.sin(breathTime * .9);
-    const headX = gazeX * 2.6 + current.head * .65 + headSettleX;
-    const headY = gazeY * 1.7 + headSettleY;
+    const featureX = gazeX * 0.85 + current.head * .12 + headSettleX * .20;
+    const featureY = gazeY * 0.55 + headSettleY * .14;
     const breathPhase = breathTime * .9;
     const leftShoulder = Math.sin(breathPhase) * .9;
     const rightShoulder = Math.sin(breathPhase + .18) * .9;
@@ -216,32 +216,32 @@ export function createLivingCharacter(canvas) {
     context.imageSmoothingEnabled = true;
     context.imageSmoothingQuality = 'high';
 
-    drawLayer('body', 0, bodyY, 1, 1 + breath * .004, 0, 1);
+    drawLayer('body', 0, bodyY, 1, 1 + breath * .003, 0, 1);
     drawLayer('face', headX, headY, 1, 1, current.head * .0032 + (headSettleX * .0007), 1, 510, 400);
 
-    const eyeY = headY;
-    const irisX = gazeX * 8.5 + headX;
-    const irisY = gazeY * 5.2 + eyeY;
+    const eyeY = featureY;
+    const irisX = gazeX * 7.2 + featureX;
+    const irisY = gazeY * 4.4 + eyeY;
     const eyeScaleY = 1;
 
-    drawLayer('leftEye', headX, eyeY, 1, eyeScaleY, current.head * .003, 1, LANDMARKS.leftEye[0], LANDMARKS.leftEye[1]);
-    drawLayer('rightEye', headX, eyeY, 1, eyeScaleY, current.head * .003, 1, LANDMARKS.rightEye[0], LANDMARKS.rightEye[1]);
-    drawLayer('leftIris', irisX, irisY, 1, 1, 0, 1, LANDMARKS.leftEye[0], LANDMARKS.leftEye[1]);
-    drawLayer('rightIris', irisX, irisY, 1, 1, 0, 1, LANDMARKS.rightEye[0], LANDMARKS.rightEye[1]);
+    drawLayer('leftEye', 0, 0, 1, eyeScaleY, 0, 1);
+    drawLayer('rightEye', 0, 0, 1, eyeScaleY, 0, 1);
+    drawLayer('leftIris', irisX, irisY, 1, 1, 0, 1);
+    drawLayer('rightIris', irisX, irisY, 1, 1, 0, 1);
 
     const browLift = current.brow * -3.5 - gazeY * .7;
-    drawLayer('leftBrow', headX * .78 + leftShoulder * .06, eyeY + browLift, 1, 1, current.head * .003, 1, 510, 290);
-    drawLayer('rightBrow', headX * .78 + rightShoulder * .06, eyeY + browLift, 1, 1, current.head * .003, 1, 510, 290);
+    drawLayer('leftBrow', featureX * .78 + leftShoulder * .05, browLift + eyeY, 1, 1, current.head * .002, 1);
+    drawLayer('rightBrow', featureX * .78 + rightShoulder * .05, browLift + eyeY, 1, 1, current.head * .002, 1);
 
     const mouthOpen = state === 'speaking'
       ? Math.abs(Math.sin(t * 13.5)) * .045 + voicePulse * .026
       : voicePulse * .01;
     const mouthLift = -current.smile * 2.3;
-    drawLayer('mouth', headX * .55, eyeY + mouthLift, 1 + current.smile * .032, 1 + mouthOpen, current.head * .002, 1, 510, 465);
+    drawLayer('mouth', featureX * .42, mouthLift + eyeY, 1 + current.smile * .022, 1 + mouthOpen, current.head * .001, 1);
 
     if (blink > .02) {
-      drawLayer('closedLeft', headX, eyeY, 1, 1, current.head * .003, blink);
-      drawLayer('closedRight', headX, eyeY, 1, 1, current.head * .003, blink);
+      drawLayer('closedLeft', featureX, eyeY, 1, 1, current.head * .002, blink);
+      drawLayer('closedRight', featureX, eyeY, 1, 1, current.head * .002, blink);
 
       context.save();
       context.globalAlpha = Math.min(.92, blink);
@@ -249,9 +249,9 @@ export function createLivingCharacter(canvas) {
       context.lineWidth = Math.max(1.1, 1.8 * scale);
       context.lineCap = 'round';
 
-      const leftLineX = offsetX + (POSITIONS.closedLeft[0] + headX + 7) * scale;
+      const leftLineX = offsetX + (POSITIONS.closedLeft[0] + featureX + 7) * scale;
       const leftLineY = offsetY + (POSITIONS.closedLeft[1] + eyeY + 17) * scale;
-      const rightLineX = offsetX + (POSITIONS.closedRight[0] + headX + 7) * scale;
+      const rightLineX = offsetX + (POSITIONS.closedRight[0] + featureX + 7) * scale;
       const rightLineY = offsetY + (POSITIONS.closedRight[1] + eyeY + 17) * scale;
 
       context.beginPath();
