@@ -1,34 +1,8 @@
 const MAX_AUDIO_BYTES = 3.5 * 1024 * 1024;
-const ALLOWED_MIME_TYPES = new Map([
-  ['audio/webm', 'audio.webm'],
-  ['audio/webm;codecs=opus', 'audio.webm'],
-  ['audio/ogg', 'audio.ogg'],
-  ['audio/ogg;codecs=opus', 'audio.ogg'],
-  ['audio/wav', 'audio.wav'],
-  ['audio/mpeg', 'audio.mp3'],
-  ['audio/mp4', 'audio.mp4']
-]);
 
 function json(res, status, body) {
   res.status(status).setHeader('Content-Type', 'application/json');
   res.end(JSON.stringify(body));
-}
-
-function validAudio(audio, mimeType) {
-  return typeof audio === 'string'
-    && audio.length > 0
-    && audio.length <= Math.ceil(MAX_AUDIO_BYTES * 1.4)
-    && ALLOWED_MIME_TYPES.has(mimeType);
-}
-
-function decodeBase64(base64) {
-  const buffer = Buffer.from(base64, 'base64');
-
-  if (buffer.length > MAX_AUDIO_BYTES) {
-    throw new Error('Recording is too large.');
-  }
-
-  return buffer;
 }
 
 export default async function handler(req, res) {
@@ -50,26 +24,44 @@ export default async function handler(req, res) {
     if (Buffer.isBuffer(audio)) {
       buffer = audio;
     } else if (typeof audio === 'string') {
-      buffer = decodeBase64(audio);
+      buffer = Buffer.from(audio, 'base64');
     } else if (audio instanceof Uint8Array) {
       buffer = Buffer.from(audio);
     } else {
       throw new Error('No microphone recording was received.');
     }
 
+    if (!buffer.length) {
+      throw new Error('The microphone returned an empty recording.');
+    }
+
     if (buffer.length > MAX_AUDIO_BYTES) {
       throw new Error('Recording is too large.');
     }
+
+    const extension =
+      mimeType.startsWith('audio/ogg') ? 'ogg' :
+      mimeType.startsWith('audio/wav') ? 'wav' :
+      mimeType.startsWith('audio/mp4') ? 'mp4' :
+      mimeType.startsWith('audio/mpeg') ? 'mp3' :
+      'webm';
+
     const file = new File(
       [buffer],
-      ALLOWED_MIME_TYPES.get(mimeType) || 'audio.webm',
-      { type: mimeType.split(';')[0] }
+      `alive-recording.${extension}`,
+      { type: mimeType }
     );
 
     const form = new FormData();
-    form.append('file', file);
-    form.append('model', process.env.ALIVE_TRANSCRIBE_MODEL || 'gpt-4o-mini-transcribe');
-
+    form.append(
+      'file',
+      file,
+      `alive-recording.${extension}`
+    );
+    form.append(
+      'model',
+      process.env.ALIVE_TRANSCRIBE_MODEL || 'gpt-4o-mini-transcribe'
+    );
 
     const upstream = await fetch('https://api.openai.com/v1/audio/transcriptions', {
       method: 'POST',
@@ -79,7 +71,7 @@ export default async function handler(req, res) {
       body: form
     });
 
-    const data = await upstream.json();
+    const data = await upstream.json().catch(() => ({}));
 
     if (!upstream.ok) {
       return json(
