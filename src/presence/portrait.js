@@ -334,7 +334,7 @@ export function createLivingPortrait(canvas, src, { fallbackSrc } = {}) {
           blink: gl.getUniformLocation(program, 'u_blink'),
           leftEye: gl.getUniformLocation(program, 'u_leftEye'),
           rightEye: gl.getUniformLocation(program, 'u_rightEye'),
-          mouth: gl.getUniformLocation(program, 'u_mouth'), gl.getUniformLocation(program, 'u_blink'),
+          mouth: gl.getUniformLocation(program, 'u_mouth'),
           speech: gl.getUniformLocation(program, 'u_speech'),
           ready: gl.getUniformLocation(program, 'u_ready'),
           crop: gl.getUniformLocation(program, 'u_crop'),
