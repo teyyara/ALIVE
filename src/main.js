@@ -188,8 +188,6 @@ function handlePointerMove(event) {
   portrait.setAttention(clampedX, clampedY);
   root.style.setProperty('--visitor-x', `${event.clientX}px`);
   root.style.setProperty('--visitor-y', `${event.clientY}px`);
-  root.style.setProperty('--attention-x', `${x * 1.6}px`);
-  root.style.setProperty('--attention-y', `${y * 1.0}px`);
 
   if (Math.abs(x) > .13 || Math.abs(y) > .13) {
     window.clearTimeout(returnTimer);
@@ -201,8 +199,6 @@ window.addEventListener('pointermove', handlePointerMove, { passive: true });
 window.addEventListener('pointerleave', () => {
   character.setAttention(0, 0);
   portrait.setAttention(0, 0);
-  root.style.setProperty('--attention-x', '0px');
-  root.style.setProperty('--attention-y', '0px');
   window.clearTimeout(returnTimer);
   returnTimer = window.setTimeout(() => {
     if (state === 'attentive' || state === 'curious') setState('idle');
@@ -252,6 +248,7 @@ document.addEventListener('visibilitychange', () => {
     window.clearTimeout(blinkTimer);
     window.clearTimeout(idleTimer);
     character.setAttention(0, 0);
+    portrait.setAttention(0, 0);
     return;
   }
   scheduleBlink();
@@ -304,6 +301,7 @@ if (labMode) {
     window.clearTimeout(returnTimer);
     window.clearTimeout(voiceTimer);
     window.clearInterval(timeTimer);
+    portrait.destroy();
     character.destroy();
     document.documentElement.dataset.labDone = 'true';
   }, 1500);
