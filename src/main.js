@@ -447,7 +447,7 @@ document.querySelector('#brand').addEventListener('click', () => {
 
 const world = createWorldController({ scene });
 
-attachVisitorPresence({
+const destroyVisitorPresence = attachVisitorPresence({
   scene,
   setState,
   getState
