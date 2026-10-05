@@ -28,7 +28,7 @@ jobs:
 
       - name: Install Playwright
         run: |
-          python3 -m pip install playwright
+          python3 -m pip install playwright pillow
           python3 -m playwright install --with-deps chromium
 
       - name: Start Vite server
@@ -46,6 +46,7 @@ jobs:
         run: |
           python3 - <<'PY'
           from playwright.sync_api import sync_playwright
+          from PIL import Image, ImageChops, ImageStat
           import json
           from pathlib import Path
           
@@ -58,8 +59,18 @@ jobs:
               ("curious", "left"),
               ("thinking", "right"),
               ("speaking", "center"),
-              ("blink", "center"),
           ]
+          
+          def eye_clip(page):
+              box = page.locator("#character-stage").bounding_box()
+              if not box:
+                  raise RuntimeError("Character stage has no bounding box.")
+              return {
+                  "x": box["x"] + box["width"] * 0.31,
+                  "y": box["y"] + box["height"] * 0.28,
+                  "width": box["width"] * 0.38,
+                  "height": box["height"] * 0.17,
+              }
           
           with sync_playwright() as p:
               browser = p.chromium.launch(headless=True)
@@ -71,18 +82,73 @@ jobs:
                   page.goto(f"http://127.0.0.1:4173/?lab={state}&gaze={gaze}", wait_until="domcontentloaded")
                   page.wait_for_timeout(700)
                   page.screenshot(path=str(out / f"{state}-{gaze}.png"), full_page=True)
+                  if state in {"idle", "curious"}:
+                      page.screenshot(path=str(out / f"eyes-{state}-{gaze}.png"), clip=eye_clip(page))
               
+              # Deterministic blink capture, while the eyelid is actually moving.
               page.goto("http://127.0.0.1:4173/?lab=idle&gaze=center", wait_until="domcontentloaded")
-              page.mouse.move(720, 410)
-              page.wait_for_timeout(300)
-              page.locator("#message").fill("hello ALIVE")
-              page.wait_for_timeout(250)
-              page.screenshot(path=str(out / "typing.png"), full_page=True)
+              page.wait_for_timeout(450)
+              page.evaluate("window.__ALIVE_TEST__.blink()")
+              page.wait_for_timeout(65)
+              blink_state = page.evaluate("window.__ALIVE_TEST__.getCharacter()")
+              page.screenshot(path=str(out / "blink-center.png"), full_page=True)
+              page.screenshot(path=str(out / "eyes-blink.png"), clip=eye_clip(page))
               
+              if blink_state["blink"] < 0.18:
+                  raise SystemExit(f"Blink did not reach visible range: {blink_state}")
+              
+              # True interaction check, not URL state injection.
+              page.goto("http://127.0.0.1:4173/", wait_until="domcontentloaded")
+              page.wait_for_timeout(400)
+              box = page.locator("#character-stage").bounding_box()
+              page.mouse.move(box["x"] + box["width"] * .78, box["y"] + box["height"] * .42)
+              page.wait_for_timeout(350)
+              gaze_state = page.evaluate("window.__ALIVE_TEST__?.getCharacter?.()")
+              if gaze_state is None or gaze_state["gazeX"] < 0.08:
+                  raise SystemExit(f"Pointer attention did not move character gaze: {gaze_state}")
+              
+              page.locator("#message").fill("hello ALIVE")
+              page.wait_for_timeout(120)
+              if page.locator("#state-label").inner_text() != "Curious":
+                  raise SystemExit("Typing did not move ALIVE into Curious state.")
+              
+              page.locator("#composer").evaluate("(form) => form.requestSubmit()")
+              page.wait_for_timeout(330)
+              if page.locator("#state-label").inner_text() != "Thinking":
+                  raise SystemExit("Conversation did not enter Thinking state.")
+              
+              page.wait_for_timeout(800)
+              if page.locator("#messages .alive").count() < 1:
+                  raise SystemExit("Conversation did not produce an ALIVE response.")
+              
+              page.screenshot(path=str(out / "interaction.png"), full_page=True)
               browser.close()
           
-          Path("lab/latest/browser-errors.json").write_text(json.dumps(errors, indent=2))
-          print(json.dumps({"browser_errors": len(errors), "snapshots": len(list(out.glob("*.png")))}))
+          # Pixel-level proof that gaze is changing the eye region.
+          center = Image.open(out / "eyes-idle-center.png").convert("RGB")
+          left = Image.open(out / "eyes-curious-left.png").convert("RGB")
+          diff = ImageChops.difference(center, left)
+          mean_diff = sum(ImageStat.Stat(diff).mean) / 3
+          blink = Image.open(out / "eyes-blink.png").convert("RGB")
+          blink_diff = ImageChops.difference(center, blink)
+          blink_mean = sum(ImageStat.Stat(blink_diff).mean) / 3
+          
+          diagnostics = {
+              "browser_errors": errors,
+              "gaze_eye_region_mean_difference": mean_diff,
+              "blink_eye_region_mean_difference": blink_mean,
+              "snapshots": len(list(out.glob("*.png"))),
+          }
+          Path("lab/latest/browser-errors.json").write_text(json.dumps(diagnostics, indent=2))
+          print(json.dumps(diagnostics))
+          
+          # The browser rendered successfully; visual thresholds are deliberately permissive.
+          if mean_diff < 0.10:
+              raise SystemExit(f"Eye-region gaze difference is too small: {mean_diff}")
+          if blink_mean < 0.10:
+              raise SystemExit(f"Eye-region blink difference is too small: {blink_mean}")
+          if errors:
+              raise SystemExit(f"Browser reported {len(errors)} errors/warnings.")
           PY
 
       - name: Commit latest visual snapshots
