@@ -117,14 +117,6 @@ button { color: inherit; }
   transform-origin: 50% 46%;
 }
 
-.portrait-base {
-  object-fit: cover;
-  border-radius: 0;
-  box-shadow: none;
-  transform-origin: 50% 46%;
-  scale: 1.035;
-}
-
 #portrait-canvas {
   z-index: 1;
   pointer-events: none;
@@ -287,6 +279,7 @@ button { color: inherit; }
     scroll-behavior: auto !important;
     transition-duration: .001ms !important;
   }
+  #portrait-canvas,
   #character-canvas { filter: none !important; }
 }
 
