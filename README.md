@@ -53,4 +53,4 @@ The first presence layer is now intentionally useful even without API credits. T
 
 When API credits are unavailable, ALIVE stops retrying the paid mind/transcription path for the current session and remains responsive locally rather than becoming a broken shell.
 
-The chosen identity still comes from `public/assets/alive-portrait.jpg`, but the browser now renders that source through `src/presence/portrait.js` so gaze, blinking, breathing, and speech can deform the actual image pixels. The high-quality source should replace the compressed asset later without changing the animation architecture.
+The chosen identity is rendered through `src/presence/portrait.js` so gaze, blinking, breathing, expression, and speech can deform the actual image pixels. ALIVE now prefers `public/assets/alive-portrait-clean.jpg` (a clean crop of the high-resolution source without the original mockup UI) and falls back to `public/assets/alive-portrait.jpg` when it is not present. Replacing the compressed asset is therefore a one-file addition, not an architectural change.
