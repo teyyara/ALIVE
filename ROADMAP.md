@@ -43,8 +43,8 @@ Voice becomes part of the character rather than a separate utility.
 
 ## 05 — Mind
 The local prototype connects to a real conversational model.
-- streaming responses
-- interruption
+- streaming responses ✅
+- interruption ✅
 - conversation memory boundaries
 - tool use
 - graceful offline / unavailable states
