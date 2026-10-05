@@ -22,6 +22,7 @@ The chosen ALIVE face becomes the stable visual identity.
 - consistent proportions and lighting
 - visual state language
 - state-reactive portrait lighting
+- live GPU portrait surface ✅
 - restrained depth-plane scaffold
 
 ## 03 — Expression
@@ -63,7 +64,7 @@ The room becomes responsive.
 
 ## 07 — Embodiment
 Explore increasingly expressive character rendering.
-- 2.5D layer deformation
+- 2.5D layer deformation ✅
 - richer face animation
 - hands and posture
 - WebGL / 3D experiments where they improve presence
