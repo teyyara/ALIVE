@@ -1114,6 +1114,36 @@ button { color: inherit; }
   filter: brightness(1.015);
 }
 
+.speech-beat .halo {
+  animation: speech-beat-halo .19s ease-out;
+}
+
+.speech-beat .lamp-glow {
+  animation: speech-beat-lamp .19s ease-out;
+}
+
+.speech-beat .portrait-expression-light {
+  opacity: .7;
+}
+
+.speech-beat .status-dot {
+  transform: scale(1.18);
+  box-shadow: 0 0 24px rgba(241, 207, 180, .66);
+}
+
+@keyframes speech-beat-halo {
+  0% { transform: scale(1); opacity: .68; }
+  42% { transform: scale(1.026); opacity: .88; }
+  100% { transform: scale(1); opacity: .68; }
+}
+
+@keyframes speech-beat-lamp {
+  0% { transform: scale(1); opacity: .78; }
+  45% { transform: scale(1.025); opacity: .96; }
+  100% { transform: scale(1); opacity: .78; }
+}
+
+
 @keyframes listening-expression {
   0%, 100% { opacity: .48; transform: translateY(0) scale(.996); }
   50% { opacity: .72; transform: translateY(-1px) scale(1.006); }
