@@ -146,6 +146,18 @@ function setState(nextState) {
 
   shell.dataset.state = activeState;
   document.querySelector('.scene').dataset.state = activeState;
+
+  const expressionByState = {
+    idle: [0.14, 0],
+    listening: [0.10, -0.04],
+    curious: [0.17, -0.35],
+    thinking: [0.03, 0.55],
+    warm: [0.30, -0.02],
+    playful: [0.52, -0.18],
+    speaking: [0.16, -0.02]
+  };
+  const [smile, thought] = expressionByState[activeState] || expressionByState.idle;
+  livingPortrait.setExpression(smile, thought);
   stateLabel.textContent = state.label;
   stateSublabel.textContent = state.sublabel;
   line.textContent = state.line;
