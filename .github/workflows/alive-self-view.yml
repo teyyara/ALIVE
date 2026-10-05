@@ -31,10 +31,16 @@ jobs:
           python3 -m pip install playwright
           python3 -m playwright install --with-deps chromium
 
-      - name: Start static server
+      - name: Start Vite server
         run: |
-          python3 -m http.server 4173 --directory . >/tmp/alive-server.log 2>&1 &
+          npm run dev -- --host 127.0.0.1 --port 4173 --strictPort >/tmp/alive-server.log 2>&1 &
           echo $! > /tmp/alive-server.pid
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/alive-server.log
+          exit 1
 
       - name: Run self-view lab
         run: |
