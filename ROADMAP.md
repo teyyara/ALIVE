@@ -21,6 +21,7 @@ The chosen ALIVE face becomes the stable visual identity.
 - layered character source
 - consistent proportions and lighting
 - visual state language
+- restrained depth-plane scaffold
 
 ## 03 — Expression
 The body communicates before language does.
