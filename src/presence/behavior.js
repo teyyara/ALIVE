@@ -6,7 +6,7 @@ function blink(stage) {
   window.setTimeout(() => stage.classList.remove('blink'), 155);
 }
 
-export function createIdleBehavior({ stage, setState, getState }) {
+export function createIdleBehavior({ stage, setState, getState, onBlink }) {
   let stopped = false;
   let paused = document.hidden;
   let timer;
@@ -19,9 +19,13 @@ export function createIdleBehavior({ stage, setState, getState }) {
 
     blinkTimer = window.setTimeout(() => {
       blink(stage);
+      onBlink?.();
 
       if (Math.random() > 0.88) {
-        window.setTimeout(() => blink(stage), randomBetween(220, 380));
+        window.setTimeout(() => {
+          blink(stage);
+          onBlink?.();
+        }, randomBetween(220, 380));
       }
 
       scheduleBlink();
