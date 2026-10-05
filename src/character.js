@@ -1,5 +1,4 @@
 const ASSETS = {
-  base: '/assets/alive-base.jpg',
   body: '/assets/alive-body.webp',
   face: '/assets/alive-face.webp',
   leftEye: '/assets/alive-eye-left-base.webp',
@@ -14,7 +13,6 @@ const ASSETS = {
 };
 
 const POSITIONS = {
-  base: [0, 0],
   body: [70, 450],
   face: [260, 110],
   leftEye: [370, 270],
@@ -218,7 +216,6 @@ export function createLivingCharacter(canvas) {
     context.imageSmoothingEnabled = true;
     context.imageSmoothingQuality = 'high';
 
-    drawLayer('base');
     drawLayer('body', 0, bodyY, 1, 1 + breath * .004, 0, 1);
     drawLayer('face', headX, headY, 1, 1, current.head * .0032 + (headSettleX * .0007), 1, 510, 400);
 
