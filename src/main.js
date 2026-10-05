@@ -49,6 +49,15 @@ const presenceLine = document.querySelector('#presence-line');
 
 const character = createLivingCharacter(canvas);
 
+if (labMode) {
+  window.__ALIVE_TEST__ = {
+    blink: () => character.blink(),
+    setGaze: (x, y) => character.setAttention(x, y),
+    getState: () => state,
+    getCharacter: () => character.getDebugState()
+  };
+}
+
 const STATES = Object.freeze({
   idle: ['Here', 'A DIGITAL PRESENCE', 'I’m here.'],
   attentive: ['Attentive', 'I NOTICED YOU', 'I’m with you.'],
