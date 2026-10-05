@@ -61,7 +61,7 @@ export function attachVisitorPresence({ scene, setState, getState }) {
   };
 
   const onLeave = () => {
-    scene.classList.remove('visitor-moving', 'visitor-settled', 'visitor-rush', 'attention-held');
+    scene.classList.remove('visitor-moving', 'visitor-settled', 'visitor-rush');
     window.clearTimeout(timeout);
     window.clearTimeout(slowTimeout);
     window.clearTimeout(settleTimeout);
