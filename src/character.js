@@ -114,14 +114,14 @@ export function createLivingCharacter(canvas) {
     targetY = clamp(Number(y) || 0, -1, 1);
   }
 
-  function scheduleAutonomousGaze(now) {
+  function scheduleAutonomousGaze() {
     if (destroyed) return;
     autonomousTimer = window.setTimeout(() => {
       if (destroyed) return;
 
       autonomousX = (Math.random() * 2 - 1) * .22;
       autonomousY = (Math.random() * 2 - 1) * .14;
-      scheduleAutonomousGaze(now + 1);
+      scheduleAutonomousGaze();
     }, 4200 + Math.random() * 5200);
   }
 
@@ -241,7 +241,6 @@ export function createLivingCharacter(canvas) {
     const eyeY = featureY;
     const irisX = gazeX * 7.2 + featureX;
     const irisY = gazeY * 4.4 + eyeY;
-    const eyeScaleY = 1;
 
     const lidCompression = state === 'thinking' ? .985 : state === 'listening' ? .992 : 1;
     drawLayer('leftEye', 0, 0, 1, lidCompression, 0, 1);
@@ -306,7 +305,7 @@ export function createLivingCharacter(canvas) {
     .catch((error) => console.error('[ALIVE] character asset error', error));
 
   frameId = requestAnimationFrame(frame);
-  scheduleAutonomousGaze(0);
+  scheduleAutonomousGaze();
   scheduleHeadSettle();
   setState('idle');
 
