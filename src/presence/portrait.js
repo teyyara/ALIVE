@@ -166,6 +166,8 @@ export function createLivingPortrait(canvas, src) {
   let gazeY = 0;
   let expressionSmile = 0.18;
   let expressionThought = 0;
+  let expressionSmileTarget = 0.18;
+  let expressionThoughtTarget = 0;
   let speech = 0;
   let ready = 0;
   let gl = null;
@@ -180,6 +182,8 @@ export function createLivingPortrait(canvas, src) {
 
     const time = timeMs * 0.001;
     blinkCurrent += (blinkTarget - blinkCurrent) * 0.26;
+    expressionSmile += (expressionSmileTarget - expressionSmile) * 0.08;
+    expressionThought += (expressionThoughtTarget - expressionThought) * 0.08;
     speech *= 0.91;
 
     if (gl && program && texture) {
@@ -343,8 +347,8 @@ export function createLivingPortrait(canvas, src) {
     },
 
     setExpression(smile = 0.18, thought = 0) {
-      expressionSmile = Number(smile) || 0;
-      expressionThought = Number(thought) || 0;
+      expressionSmileTarget = Math.max(-0.2, Math.min(1, Number(smile) || 0));
+      expressionThoughtTarget = Math.max(-1, Math.min(1, Number(thought) || 0));
     },
 
     blink() {
