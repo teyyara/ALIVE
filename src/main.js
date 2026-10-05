@@ -511,6 +511,42 @@ const destroyAttention = attachAttention(stage, {
 });
 const destroyIdleBehavior = createIdleBehavior({ stage, setState, getState });
 
+let hiddenAt = null;
+
+const onVisibilityChange = () => {
+  if (document.hidden) {
+    hiddenAt = Date.now();
+    voice.stop();
+    scene.classList.remove(
+      'visitor-present',
+      'visitor-moving',
+      'visitor-settled',
+      'visitor-rush',
+      'attention-held',
+      'keyboard-present'
+    );
+    return;
+  }
+
+  if (hiddenAt === null) return;
+
+  const awayFor = Date.now() - hiddenAt;
+  hiddenAt = null;
+
+  if (awayFor < 2500) return;
+
+  scene.classList.add('returning');
+  addBubble('alive', 'There you are.');
+  setState('warm');
+
+  window.setTimeout(() => {
+    scene.classList.remove('returning');
+    if (getState() === 'warm') setState('idle');
+  }, 2400);
+};
+
+document.addEventListener('visibilitychange', onVisibilityChange);
+
 const clockTimer = window.setInterval(tick, 1000);
 
 window.addEventListener('beforeunload', () => {
@@ -519,6 +555,7 @@ window.addEventListener('beforeunload', () => {
   destroyVisitorPresence();
   destroyAttention();
   destroyIdleBehavior();
+  document.removeEventListener('visibilitychange', onVisibilityChange);
   voice.destroy();
 }, { once: true });
 tick();
