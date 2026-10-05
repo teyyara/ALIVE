@@ -51,7 +51,8 @@ The local prototype connects to a real conversational model.
 
 ## 06 — World
 The room becomes responsive.
-- time of day
+- time of day ✅
+- moon cycle ✅
 - weather
 - environmental motion
 - lighting state
