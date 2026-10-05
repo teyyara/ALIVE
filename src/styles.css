@@ -90,6 +90,43 @@ button { color: inherit; }
   filter: blur(.3px);
 }
 
+.window-moon {
+  position: absolute;
+  right: 13%;
+  top: 13%;
+  width: clamp(24px, 3.4vw, 42px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(246, 235, 221, .84);
+  box-shadow:
+    0 0 18px rgba(246, 235, 221, .20),
+    0 0 42px rgba(230, 208, 189, .09);
+  opacity: 0;
+  transform: translate3d(0, 0, 0) scale(.94);
+  transition: opacity 1.8s ease, transform 2.8s ease;
+  z-index: 2;
+}
+
+[data-time="night"] .window-moon {
+  opacity: .62;
+  transform: translate3d(var(--moon-drift-x, 0px), var(--moon-drift-y, 0px), 0) scale(1);
+}
+
+[data-moon="0"] .window-moon { opacity: .02; }
+[data-moon="1"] .window-moon { clip-path: polygon(52% 0,100% 0,100% 100%,52% 100%); }
+[data-moon="2"] .window-moon { clip-path: polygon(50% 0,100% 0,100% 100%,50% 100%,38% 75%,30% 50%,38% 25%); }
+[data-moon="3"] .window-moon { clip-path: polygon(42% 0,100% 0,100% 100%,42% 100%,28% 76%,22% 50%,28% 24%); }
+[data-moon="4"] .window-moon {
+  clip-path: circle(50% at 50% 50%);
+}
+[data-moon="5"] .window-moon { clip-path: polygon(0 0,58% 0,72% 24%,78% 50%,72% 76%,58% 100%,0 100%); }
+[data-moon="6"] .window-moon { clip-path: polygon(0 0,50% 0,62% 25%,70% 50%,62% 75%,50% 100%,0 100%); }
+[data-moon="7"] .window-moon { clip-path: polygon(0 0,48% 0,100% 0,100% 100%,48% 100%,58% 75%,66% 50%,58% 25%); }
+
+[data-time="night"] .window-moon {
+  animation: moon-drift 16s ease-in-out infinite;
+}
+
 .window-lights {
   position: absolute;
   left: 8%;
@@ -1072,6 +1109,11 @@ button { color: inherit; }
 @keyframes lamp-breathe {
   0%, 100% { opacity: .75; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.045); }
+}
+
+@keyframes moon-drift {
+  0%, 100% { transform: translate3d(-1px, 0, 0) scale(.995); }
+  50% { transform: translate3d(2px, -1px, 0) scale(1.015); }
 }
 
 @keyframes city-glimmer {
