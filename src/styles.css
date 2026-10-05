@@ -124,6 +124,27 @@ button { color: inherit; }
   animation: alive-breath 5.8s ease-in-out infinite;
 }
 
+.portrait-head {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  will-change: transform;
+  transform-origin: 50% 42%;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 35%, #000 18%, rgba(0,0,0,.9) 30%, rgba(0,0,0,.48) 43%, transparent 56%);
+  mask-image: radial-gradient(ellipse at 50% 35%, #000 18%, rgba(0,0,0,.9) 30%, rgba(0,0,0,.48) 43%, transparent 56%);
+  animation: alive-head 7.4s ease-in-out infinite;
+}
+
+@keyframes alive-head {
+  0%, 100% { transform: translate3d(0,0,0) rotate(0deg) scale(1); }
+  36% { transform: translate3d(.35px,-1px,0) rotate(-.08deg) scale(1.001); }
+  63% { transform: translate3d(-.45px,-.45px,0) rotate(.07deg) scale(1); }
+}
+
 @keyframes alive-breath {
   0%, 100% { transform: translateY(0) scale(1); }
   42% { transform: translateY(-1.6px) scale(1.006); }
