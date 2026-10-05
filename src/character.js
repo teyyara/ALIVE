@@ -1,8 +1,6 @@
 const ASSETS = {
   leftIris: '/assets/alive-iris-left.webp',
-  rightIris: '/assets/alive-iris-right.webp',
-  leftClosed: '/assets/alive-closed-left.webp',
-  rightClosed: '/assets/alive-closed-right.webp'
+  rightIris: '/assets/alive-iris-right.webp'
 };
 
 const SOURCE = Object.freeze({
@@ -112,14 +110,40 @@ export function createLivingCharacter(canvas) {
     context.restore();
   }
 
-  function drawBlink(image, eye) {
+  function drawBlink(eye, side) {
     const [cx, cy] = sourcePoint(eye);
-    const w = 62 * scale;
-    const h = 30 * scale;
+    const w = 65 * scale;
+    const h = 25 * scale;
+    const y = cy + 2 * scale;
 
     context.save();
-    context.globalAlpha = Math.min(1, blink);
-    context.drawImage(image, cx - w * .5, cy - h * .5, w, h);
+    context.globalAlpha = Math.min(1, blink) * .82;
+    context.filter = 'blur(.45px)';
+
+    const gradient = context.createLinearGradient(0, y - h, 0, y + h);
+    gradient.addColorStop(0, 'rgba(244, 205, 190, .06)');
+    gradient.addColorStop(.34, side === 'left'
+      ? 'rgba(218, 157, 137, .72)'
+      : 'rgba(210, 145, 129, .69)');
+    gradient.addColorStop(1, 'rgba(143, 88, 77, .12)');
+
+    context.beginPath();
+    context.ellipse(cx, y, w * .5, h * .5, 0, 0, Math.PI * 2);
+    context.fillStyle = gradient;
+    context.fill();
+
+    context.filter = 'none';
+    context.globalAlpha = Math.min(1, blink) * .75;
+    context.beginPath();
+    context.moveTo(cx - w * .45, y);
+    context.quadraticCurveTo(cx, y + 6 * scale, cx + w * .45, y);
+    context.strokeStyle = side === 'left'
+      ? 'rgba(103, 59, 53, .70)'
+      : 'rgba(92, 54, 50, .66)';
+    context.lineWidth = 1.5 * scale;
+    context.lineCap = 'round';
+    context.stroke();
+
     context.restore();
   }
 
@@ -144,8 +168,8 @@ export function createLivingCharacter(canvas) {
       drawIris(assets.rightIris, SOURCE.rightEye, SOURCE.rightIrisCenter, gazeX, gazeY);
 
       if (blink > .02) {
-        drawBlink(assets.leftClosed, SOURCE.leftEye);
-        drawBlink(assets.rightClosed, SOURCE.rightEye);
+        drawBlink(SOURCE.leftEye, 'left');
+        drawBlink(SOURCE.rightEye, 'right');
       }
     }
 
@@ -171,6 +195,14 @@ export function createLivingCharacter(canvas) {
     setState() {},
     blink: blinkNow,
     speechPulse: speechPulseNow,
+    getDebugState() {
+      return {
+        gazeX,
+        gazeY,
+        blink,
+        speechPulse
+      };
+    },
     destroy() {
       destroyed = true;
       window.cancelAnimationFrame(frameId);
