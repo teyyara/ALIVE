@@ -84,18 +84,18 @@ button { color: inherit; }
   aspect-ratio: 1020 / 842;
   filter: drop-shadow(0 40px 78px rgba(0,0,0,.40));
   -webkit-mask-image: radial-gradient(
-    ellipse at 50% 48%,
-    #000 31%,
-    rgba(0,0,0,.96) 52%,
-    rgba(0,0,0,.46) 68%,
-    transparent 82%
+    ellipse 46% 54% at 50% 46%,
+    #000 0 57%,
+    rgba(0,0,0,.86) 70%,
+    rgba(0,0,0,.22) 86%,
+    transparent 100%
   );
   mask-image: radial-gradient(
-    ellipse at 50% 48%,
-    #000 31%,
-    rgba(0,0,0,.96) 52%,
-    rgba(0,0,0,.46) 68%,
-    transparent 82%
+    ellipse 46% 54% at 50% 46%,
+    #000 0 57%,
+    rgba(0,0,0,.86) 70%,
+    rgba(0,0,0,.22) 86%,
+    transparent 100%
   );
 }
 
@@ -113,6 +113,8 @@ button { color: inherit; }
   object-fit: cover;
   border-radius: 0;
   box-shadow: none;
+  transform: scale(1.035);
+  transform-origin: 50% 46%;
 }
 
 .portrait-breath {
