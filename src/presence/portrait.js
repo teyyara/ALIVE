@@ -43,7 +43,7 @@ vec2 eyeWarp(vec2 uv, vec2 center, vec2 radius, vec2 shift, float blink) {
 }
 
 vec2 globalBreath(vec2 uv, float breath) {
-  float torsoWeight = 1.0 - smoothstep(0.22, 0.74, uv.y);
+  float torsoWeight = smoothstep(0.22, 0.74, uv.y);
   float centerY = 0.55;
 
   uv.x += sin(u_time * 0.78) * 0.0014 * torsoWeight;
@@ -94,9 +94,6 @@ void main() {
 
   float vignette = smoothstep(0.95, 0.18, length(v_uv - 0.5));
   color.rgb *= mix(0.90, 1.0, vignette);
-
-  float detail = 0.5 + 0.5 * sin((v_uv.x + v_uv.y) * 1800.0);
-  color.rgb += (detail - 0.5) * 0.006 * u_ready;
 
   gl_FragColor = color;
 }
