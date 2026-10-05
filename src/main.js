@@ -39,6 +39,11 @@ app.innerHTML = `
 const root = document.querySelector('.alive');
 const stage = document.querySelector('#character-stage');
 const canvas = document.querySelector('#character-canvas');
+
+const labParams = new URLSearchParams(window.location.search);
+const labState = labParams.get('lab');
+const labGaze = labParams.get('gaze');
+const labMode = Boolean(labState);
 const message = document.querySelector('#message');
 const composer = document.querySelector('#composer');
 const messages = document.querySelector('#messages');
@@ -74,19 +79,6 @@ const stateExpression = {
   speaking: 'speaking', warm: 'warm', curious: 'curious', playful: 'playful'
 };
 
-let state = 'idle';
-let voiceEnabled = false;
-let destroyed = false;
-let blinkTimer = 0;
-let idleTimer = 0;
-let returnTimer = 0;
-let voiceTimer = 0;
-let timeTimer = 0;
-
-const labParams = new URLSearchParams(window.location.search);
-const labState = labParams.get('lab');
-const labGaze = labParams.get('gaze');
-const labMode = Boolean(labState);
 
 function setState(next) {
   if (!STATES[next] || destroyed) return;
