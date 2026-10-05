@@ -76,7 +76,21 @@ export async function recordVoice({ onStart, onStop, onError, onLevel, maxDurati
     stream.getTracks().forEach((track) => track.stop());
     window.clearTimeout(timer);
     window.clearTimeout(silenceTimer);
+    document.removeEventListener('visibilitychange', onVisibilityChange);
+    window.removeEventListener('pagehide', onPageHide);
     audioContext?.close().catch(() => {});
+  };
+
+  const onVisibilityChange = () => {
+    if (document.hidden && recorder.state !== 'inactive') {
+      recorder.stop();
+    }
+  };
+
+  const onPageHide = () => {
+    if (recorder.state !== 'inactive') {
+      recorder.stop();
+    }
   };
 
   const promise = new Promise((resolve, reject) => {
@@ -102,6 +116,9 @@ export async function recordVoice({ onStart, onStop, onError, onLevel, maxDurati
       onStop?.(blob);
       resolve(blob);
     };
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('pagehide', onPageHide);
 
     try {
       recorder.start(250);
