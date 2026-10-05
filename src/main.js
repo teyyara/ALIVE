@@ -110,7 +110,11 @@ const voiceButton = document.querySelector('#voice');
 const listenButton = document.querySelector('#listen');
 const scene = document.querySelector('.scene');
 const livingPortraitCanvas = document.querySelector('#living-portrait');
-const livingPortrait = createLivingPortrait(livingPortraitCanvas, '/assets/alive-portrait.jpg');
+const livingPortrait = createLivingPortrait(
+  livingPortraitCanvas,
+  '/assets/alive-portrait-clean.jpg',
+  { fallbackSrc: '/assets/alive-portrait.jpg' }
+);
 
 const presenceMemory = createPresenceMemory();
 
