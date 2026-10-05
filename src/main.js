@@ -166,6 +166,9 @@ function addBubble(role, text) {
 const conversationHistory = [];
 let mindUnavailable = false;
 let transcriptionUnavailable = false;
+let activeConversationController = null;
+let activeConversationToken = 0;
+let replyTimer = null;
 
 function fallbackReply(input) {
   const normalized = input.toLowerCase();
@@ -229,7 +232,13 @@ composer.addEventListener('submit', (event) => {
   conversationHistory.push({ role: 'user', content: input });
   setState('listening');
 
-  window.setTimeout(async () => {
+  window.clearTimeout(replyTimer);
+  activeConversationController?.abort();
+  const conversationController = new AbortController();
+  const conversationToken = ++activeConversationToken;
+  activeConversationController = conversationController;
+
+  replyTimer = window.setTimeout(async () => {
     setState('thinking');
 
     let reply;
@@ -260,7 +269,10 @@ composer.addEventListener('submit', (event) => {
       reply = mindUnavailable
         ? fallbackReply(input)
         : await requestPresenceReply(conversationHistory, {
+          signal: conversationController.signal,
           onDelta: (delta) => {
+            if (conversationToken !== activeConversationToken) return;
+
             if (!streamedBubble) {
               streamedBubble = addBubble('alive', '');
             }
@@ -275,6 +287,11 @@ composer.addEventListener('submit', (event) => {
           }
         });
     } catch (error) {
+      if (conversationToken !== activeConversationToken || conversationController.signal.aborted) {
+        streamedBubble?.remove();
+        return;
+      }
+
       if (/no credits|insufficient|billing|credit/i.test(error?.message || '')) {
         mindUnavailable = true;
       }
@@ -300,6 +317,10 @@ composer.addEventListener('submit', (event) => {
 
     if (!streamedSpeech) {
       setState('warm');
+    }
+
+    if (conversationToken === activeConversationToken) {
+      activeConversationController = null;
     }
   }, 280);
 });
@@ -450,6 +471,14 @@ message.addEventListener('input', () => {
     setState('listening');
   }
 
+  if (getState() === 'thinking') {
+    window.clearTimeout(replyTimer);
+    activeConversationController?.abort();
+    activeConversationController = null;
+    activeConversationToken += 1;
+    setState('listening');
+  }
+
   scene.classList.add('keyboard-present');
   world.visitorArrived();
 
@@ -568,6 +597,8 @@ window.addEventListener('beforeunload', () => {
   destroyVisitorPresence();
   destroyAttention();
   destroyIdleBehavior();
+  window.clearTimeout(replyTimer);
+  activeConversationController?.abort();
   document.removeEventListener('visibilitychange', onVisibilityChange);
   voice.destroy();
 }, { once: true });
