@@ -511,7 +511,13 @@ const destroyAttention = attachAttention(stage, {
     if (getState() === 'idle' || getState() === 'warm') setState('curious');
   },
   onRelease: () => {
-    if (getState() === 'curious') setState('idle');
+    if (
+      getState() === 'curious' &&
+      !scene.classList.contains('keyboard-present') &&
+      !scene.classList.contains('visitor-present')
+    ) {
+      setState('idle');
+    }
   }
 });
 const destroyIdleBehavior = createIdleBehavior({ stage, setState, getState });
