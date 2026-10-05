@@ -203,6 +203,10 @@ export function createLivingCharacter(canvas) {
         speechPulse
       };
     },
+    getDebugState() {
+      return { gazeX, gazeY, blink };
+    },
+
     destroy() {
       destroyed = true;
       window.cancelAnimationFrame(frameId);
