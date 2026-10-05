@@ -433,6 +433,42 @@ let atmosphereIndex = Math.max(
   atmospheres.indexOf(readPreference(MOOD_PREFERENCE_KEY, 'curious'))
 );
 
+let typingTimer;
+
+message.addEventListener('focus', () => {
+  scene.classList.add('keyboard-present');
+  world.visitorArrived();
+
+  if (getState() === 'idle') setState('warm');
+}, { passive: true });
+
+message.addEventListener('input', () => {
+  scene.classList.add('keyboard-present');
+  world.visitorArrived();
+
+  if (getState() === 'idle' || getState() === 'warm') {
+    setState('curious');
+  }
+
+  window.clearTimeout(typingTimer);
+  typingTimer = window.setTimeout(() => {
+    scene.classList.remove('keyboard-present');
+
+    if (getState() === 'curious') {
+      setState('warm');
+    }
+  }, 1800);
+});
+
+message.addEventListener('blur', () => {
+  window.clearTimeout(typingTimer);
+  scene.classList.remove('keyboard-present');
+
+  if (getState() === 'curious' && !scene.classList.contains('attention-held')) {
+    setState('warm');
+  }
+}, { passive: true });
+
 moodButton.addEventListener('click', () => {
   atmosphereIndex = (atmosphereIndex + 1) % atmospheres.length;
   const atmosphere = atmospheres[atmosphereIndex];
