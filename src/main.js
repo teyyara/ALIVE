@@ -55,6 +55,15 @@ const presenceLine = document.querySelector('#presence-line');
 
 const character = createLivingCharacter(canvas);
 
+let state = 'idle';
+let destroyed = false;
+let voiceEnabled = false;
+let blinkTimer = null;
+let idleTimer = null;
+let returnTimer = null;
+let voiceTimer = null;
+let timeTimer = null;
+
 if (labMode || inspectMode) {
   window.__ALIVE_TEST__ = {
     blink: () => character.blink(),
@@ -66,6 +75,7 @@ if (labMode || inspectMode) {
 
 const STATES = Object.freeze({
   idle: ['Here', 'A DIGITAL PRESENCE', 'I’m here.'],
+  blink: ['Here', 'A SMALL PAUSE', 'I’m here.'],
   attentive: ['Attentive', 'I NOTICED YOU', 'I’m with you.'],
   listening: ['Listening', 'TAKE YOUR TIME', 'I’m listening.'],
   thinking: ['Thinking', 'LET ME SIT WITH THAT', '…'],
