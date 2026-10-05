@@ -9,7 +9,8 @@ The repository is intentionally small at first. The goal is not a conventional c
 - feminine visual identity
 - natural idle motion
 - state model: idle, listening, curious, thinking, warm, playful, speaking
-- pointer-aware parallax
+- pointer-aware parallax and sustained-attention response
+- typing-aware room response
 - optional browser voice output and direct microphone recording
 - modular source layout ready for a layered 2.5D/3D body
 
@@ -40,7 +41,7 @@ The server-side route uses `store: false` and receives only the recent conversat
 
 ## Current experience
 
-The first presence layer is now intentionally useful even without API credits. The browser handles pointer attention, visitor presence, local microphone recording and level sensing, voice output, ambient response, and small local conversational fallbacks. Paid services are isolated behind server-side endpoints.
+The first presence layer is now intentionally useful even without API credits. The browser handles pointer attention, sustained attention, typing engagement, visitor presence, local microphone recording and level sensing, voice output, ambient response, and small local conversational fallbacks. Paid services are isolated behind server-side endpoints.
 
 When API credits are unavailable, ALIVE stops retrying the paid mind/transcription path for the current session and remains responsive locally rather than becoming a broken shell.
 
