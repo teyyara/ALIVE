@@ -1,5 +1,7 @@
 const ASSETS = {
   portrait: '/assets/alive-clean-portrait.webp',
+  leftEye: '/assets/alive-eye-left-base.webp',
+  rightEye: '/assets/alive-eye-right-base.webp',
   leftIris: '/assets/alive-iris-left.webp',
   rightIris: '/assets/alive-iris-right.webp'
 };
@@ -8,8 +10,8 @@ const DESIGN_WIDTH = 1020;
 const DESIGN_HEIGHT = 842;
 
 const EYES = {
-  left: { x: 438, y: 326 },
-  right: { x: 563, y: 330 }
+  left: { x: 438, y: 326, boxX: 406, boxY: 300 },
+  right: { x: 563, y: 330, boxX: 531, boxY: 304 }
 };
 
 function loadImage(src) {
@@ -187,38 +189,21 @@ export function createLivingCharacter(canvas) {
     ctx.restore();
   }
 
-  function coverOriginalIris(eye, layout) {
-    const [x, y] = mapDesignToCanvas(eye.x, eye.y, layout);
+  function drawEyeBase(image, eye, layout) {
+    if (!image) return;
+
+    const x = layout.offsetX + eye.boxX * layout.scale;
+    const y = layout.offsetY + eye.boxY * layout.scale;
 
     ctx.save();
-
-    const radius = 17 * layout.scale;
-    const gradient = ctx.createRadialGradient(
-      x - 2 * layout.scale,
-      y - 2 * layout.scale,
-      1,
+    ctx.globalAlpha = 1;
+    ctx.drawImage(
+      image,
       x,
       y,
-      radius
+      image.naturalWidth * layout.scale,
+      image.naturalHeight * layout.scale
     );
-
-    gradient.addColorStop(0, 'rgba(246, 243, 238, .98)');
-    gradient.addColorStop(.72, 'rgba(236, 231, 224, .96)');
-    gradient.addColorStop(1, 'rgba(218, 209, 199, .10)');
-
-    ctx.fillStyle = gradient;
-    ctx.beginPath();
-    ctx.ellipse(
-      x,
-      y,
-      17 * layout.scale,
-      14 * layout.scale,
-      0,
-      0,
-      Math.PI * 2
-    );
-    ctx.fill();
-
     ctx.restore();
   }
 
@@ -322,8 +307,8 @@ export function createLivingCharacter(canvas) {
 
     drawPortrait(layout, breath);
 
-    coverOriginalIris(EYES.left, layout);
-    coverOriginalIris(EYES.right, layout);
+    drawEyeBase(assets.leftEye, EYES.left, layout);
+    drawEyeBase(assets.rightEye, EYES.right, layout);
 
     drawIris(assets.leftIris, EYES.left, {
       x: effectiveX,
