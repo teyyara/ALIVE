@@ -1,4 +1,4 @@
-export function createVoiceController({ onStart, onEnd, onError }) {
+export function createVoiceController({ onStart, onBoundary, onEnd, onError }) {
   let enabled = false;
   let voices = [];
   let selectedVoice = null;
@@ -67,6 +67,7 @@ export function createVoiceController({ onStart, onEnd, onError }) {
       if (selectedVoice) utterance.voice = selectedVoice;
 
       utterance.onstart = () => onStart?.();
+      utterance.onboundary = (event) => onBoundary?.(event);
       utterance.onend = () => {
         speaking = false;
 
