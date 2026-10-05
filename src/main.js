@@ -465,7 +465,14 @@ function tick() {
   }).format(new Date());
 }
 
-const destroyAttention = attachAttention(stage);
+const destroyAttention = attachAttention(stage, {
+  onHold: () => {
+    if (getState() === 'idle' || getState() === 'warm') setState('curious');
+  },
+  onRelease: () => {
+    if (getState() === 'curious') setState('idle');
+  }
+});
 const destroyIdleBehavior = createIdleBehavior({ stage, setState, getState });
 
 const clockTimer = window.setInterval(tick, 1000);
