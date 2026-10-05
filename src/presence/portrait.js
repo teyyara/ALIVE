@@ -83,7 +83,7 @@ void main() {
   vec2 rightEye = vec2(0.512, 0.346);
 
   vec2 eyeRadius = vec2(0.046, 0.036);
-  vec2 eyeShift = vec2(u_gaze.x * 0.022, u_gaze.y * 0.013);
+  vec2 eyeShift = vec2(u_gaze.x * 0.028, u_gaze.y * 0.017);
 
   float blinkAmount = smoothstep(0.0, 1.0, u_blink);
 
@@ -161,6 +161,7 @@ export function createLivingPortrait(canvas, src) {
   let raf = 0;
   let blinkTarget = 0;
   let blinkCurrent = 0;
+  let blinkTimer = null;
   let gazeX = 0;
   let gazeY = 0;
   let expressionSmile = 0.18;
@@ -348,7 +349,8 @@ export function createLivingPortrait(canvas, src) {
 
     blink() {
       blinkTarget = 1;
-      window.setTimeout(() => {
+      window.clearTimeout(blinkTimer);
+      blinkTimer = window.setTimeout(() => {
         blinkTarget = 0;
       }, 145);
     },
@@ -360,6 +362,7 @@ export function createLivingPortrait(canvas, src) {
     destroy() {
       destroyed = true;
       window.cancelAnimationFrame(raf);
+      window.clearTimeout(blinkTimer);
 
       if (gl && texture) gl.deleteTexture(texture);
       if (gl && program) gl.deleteProgram(program);
