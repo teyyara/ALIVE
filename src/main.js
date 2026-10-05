@@ -9,6 +9,7 @@ import { createWorldController } from './world.js';
 import { localFallback, requestPresenceReply } from './presence/conversation.js';
 import { recordVoice, transcribeBlob } from './presence/recorder.js';
 import { createPresenceMemory } from './presence/memory.js';
+import { createLivingPortrait } from './presence/portrait.js';
 
 const app = document.querySelector('#app');
 
@@ -49,11 +50,12 @@ app.innerHTML = `
       <div class="portrait-frame">
         <div class="character-shell" id="character-shell">
           <span class="portrait-depth-shadow" aria-hidden="true"></span>
-          <img
-            class="identity-portrait"
-            src="/assets/alive-portrait.jpg"
-            alt="ALIVE"
-          />
+          <canvas
+            class="identity-portrait living-portrait"
+            id="living-portrait"
+            role="img"
+            aria-label="ALIVE"
+          ></canvas>
           <span class="portrait-depth-veil" aria-hidden="true"></span>
           <span class="portrait-expression-light" aria-hidden="true"></span>
           <div class="portrait-attention" aria-hidden="true">
@@ -114,6 +116,8 @@ const voiceButton = document.querySelector('#voice');
 const listenButton = document.querySelector('#listen');
 const moodButton = document.querySelector('#mood');
 const scene = document.querySelector('.scene');
+const livingPortraitCanvas = document.querySelector('#living-portrait');
+const livingPortrait = createLivingPortrait(livingPortraitCanvas, '/assets/alive-portrait.jpg');
 
 const presenceMemory = createPresenceMemory();
 
@@ -220,6 +224,7 @@ let speechBeatTimer;
 const voice = createVoiceController({
   onStart: () => setState('speaking'),
   onBoundary: () => {
+    livingPortrait.speakBeat();
     scene.classList.remove('speech-beat');
     window.clearTimeout(speechBeatTimer);
     requestAnimationFrame(() => scene.classList.add('speech-beat'));
@@ -570,7 +575,12 @@ const destroyAttention = attachAttention(stage, {
     }
   }
 });
-const destroyIdleBehavior = createIdleBehavior({ stage, setState, getState });
+const destroyIdleBehavior = createIdleBehavior({
+  stage,
+  setState,
+  getState,
+  onBlink: () => livingPortrait.blink()
+});
 
 let hiddenAt = null;
 
@@ -620,6 +630,7 @@ window.addEventListener('beforeunload', () => {
   activeConversationController?.abort();
   document.removeEventListener('visibilitychange', onVisibilityChange);
   voice.destroy();
+  livingPortrait.destroy();
 }, { once: true });
 tick();
 setState('idle');
