@@ -19,6 +19,11 @@ export function createIdleBehavior({ stage, setState, getState }) {
 
     blinkTimer = window.setTimeout(() => {
       blink(stage);
+
+      if (Math.random() > 0.88) {
+        window.setTimeout(() => blink(stage), randomBetween(220, 380));
+      }
+
       scheduleBlink();
     }, randomBetween(2800, 6700));
   };
