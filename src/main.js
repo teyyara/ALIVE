@@ -582,7 +582,7 @@ if (savedVoicePreference && voice.available) {
 
 if (presenceMemory.returning) {
   window.setTimeout(() => {
-    addBubble('alive', 'You came back.');
+    addBubble('alive', presenceMemory.awayForMs >= 24 * 60 * 60 * 1000 ? 'You came back after a while.' : 'You came back.');
     setState('warm');
 
     window.setTimeout(() => {
