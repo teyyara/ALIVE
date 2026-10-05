@@ -30,13 +30,6 @@ button { color: inherit; }
 
 .world { z-index: 0; overflow: hidden; }
 
-.world-image {
-  background: url('/assets/alive-base.jpg') center center / cover no-repeat;
-  transform: scale(1.015);
-  filter: saturate(.88) contrast(1.02) brightness(.76);
-  transition: filter 1.8s ease, transform 3s cubic-bezier(.2,.7,.2,1);
-}
-
 .world-vignette {
   background:
     radial-gradient(circle at 50% 44%, transparent 17%, rgba(7,6,6,.11) 52%, rgba(5,4,4,.76) 100%),
@@ -49,11 +42,6 @@ button { color: inherit; }
   opacity: .75;
   pointer-events: none;
 }
-
-.alive[data-time="morning"] .world-image { filter: saturate(.86) contrast(1.01) brightness(.83); }
-.alive[data-time="afternoon"] .world-image { filter: saturate(.84) contrast(1.015) brightness(.80); }
-.alive[data-time="evening"] .world-image { filter: saturate(.92) contrast(1.03) brightness(.72); }
-.alive[data-time="night"] .world-image { filter: saturate(.86) contrast(1.04) brightness(.68); }
 
 .topbar {
   position: relative;
@@ -85,14 +73,14 @@ button { color: inherit; }
   display: grid;
   place-items: center;
   align-content: center;
-  padding: 12px 24px 155px;
+  padding: 6px 24px 152px;
 }
 
 .character-stage {
   position: relative;
-  width: min(1080px, 92vw);
+  width: min(1120px, 94vw);
   aspect-ratio: 1020 / 842;
-  filter: drop-shadow(0 38px 80px rgba(0,0,0,.36));
+  filter: drop-shadow(0 46px 92px rgba(0,0,0,.42));
 }
 
 #character-canvas {
