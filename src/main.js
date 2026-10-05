@@ -46,11 +46,13 @@ app.innerHTML = `
       <div class="halo"></div>
       <div class="portrait-frame">
         <div class="character-shell" id="character-shell">
+          <span class="portrait-depth-shadow" aria-hidden="true"></span>
           <img
             class="identity-portrait"
             src="/assets/alive-portrait.jpg"
             alt="ALIVE"
           />
+          <span class="portrait-depth-veil" aria-hidden="true"></span>
           <div class="portrait-attention" aria-hidden="true">
             <span class="attention-glint left"></span>
             <span class="attention-glint right"></span>
