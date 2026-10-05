@@ -231,6 +231,27 @@ composer.addEventListener('submit', (event) => {
 
     let reply;
     let streamedBubble = null;
+    let streamSpeechBuffer = '';
+    let streamedSpeech = false;
+
+    const queueStreamSpeech = (delta) => {
+      if (!voiceButton.matches('[aria-pressed="true"]')) return;
+
+      streamSpeechBuffer += delta;
+
+      const parts = streamSpeechBuffer.split(/(?<=[.!?])\s+/);
+
+      if (parts.length <= 1) return;
+
+      streamSpeechBuffer = parts.pop() || '';
+
+      for (const part of parts) {
+        if (part.trim()) {
+          voice.enqueue(part.trim());
+          streamedSpeech = true;
+        }
+      }
+    };
 
     try {
       reply = mindUnavailable
@@ -243,7 +264,11 @@ composer.addEventListener('submit', (event) => {
 
             streamedBubble.textContent += delta;
             conversation.scrollTop = conversation.scrollHeight;
-            setState('speaking');
+            queueStreamSpeech(delta);
+
+            if (streamedSpeech) {
+              setState('speaking');
+            }
           }
         });
     } catch (error) {
@@ -258,13 +283,20 @@ composer.addEventListener('submit', (event) => {
       }
     }
 
+    if (streamedSpeech && streamSpeechBuffer.trim()) {
+      voice.enqueue(streamSpeechBuffer.trim());
+    }
+
     if (!streamedBubble) {
       addBubble('alive', reply);
+      voice.speak(reply);
     }
 
     conversationHistory.push({ role: 'assistant', content: reply });
-    setState('warm');
-    voice.speak(reply);
+
+    if (!streamedSpeech) {
+      setState('warm');
+    }
   }, 280);
 });
 
@@ -446,6 +478,7 @@ setState('idle');
 const savedVoicePreference = readPreference(VOICE_PREFERENCE_KEY, 'false') === 'true';
 
 if (savedVoicePreference && voice.available) {
+  voice.setEnabled(true);
   voiceButton.setAttribute('aria-pressed', 'true');
   voiceButton.textContent = 'Voice on';
 }
