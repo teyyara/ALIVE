@@ -97,12 +97,24 @@ button { color: inherit; }
   );
 }
 
+.portrait-base,
 #character-canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   display: block;
+}
+
+.portrait-base {
+  object-fit: cover;
+  border-radius: 22px;
+  box-shadow: 0 30px 100px rgba(0,0,0,.42);
+}
+
+#character-canvas {
+  pointer-events: none;
+  z-index: 2;
 }
 
 .presence-copy {
