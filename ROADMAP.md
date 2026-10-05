@@ -17,7 +17,7 @@ The room feels inhabited.
 
 ## 02 — Identity
 The chosen ALIVE face becomes the stable visual identity.
-- final portrait asset
+- final portrait asset (clean high-resolution crop prepared)
 - layered character source
 - consistent proportions and lighting
 - visual state language
