@@ -568,12 +568,8 @@ button { color: inherit; }
   width: min(600px, 82vw);
   aspect-ratio: 1 / 1;
   position: relative;
-  transform:
-    perspective(1100px)
-    rotateX(var(--attention-tilt, 0deg))
-    rotateY(var(--attention-rotate, 0deg))
-    translate3d(0,0,0);
-  transition: transform 1.4s cubic-bezier(.2,.7,.2,1);
+  transform: none;
+  transition: none;
   will-change: transform;
 }
 
@@ -828,10 +824,8 @@ button { color: inherit; }
   transform-style: preserve-3d;
   width: min(88%, 560px);
   height: 100%;
-  transform: translate3d(var(--attention-x, 0px), var(--attention-y, 0px), 0);
-  transition:
-    transform 1.2s cubic-bezier(.2,.7,.2,1),
-    filter 1.4s ease;
+  transform: none;
+  transition: filter 1.4s ease;
   will-change: transform;
   border-radius: 34px;
 }
