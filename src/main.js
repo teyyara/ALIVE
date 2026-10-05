@@ -44,6 +44,7 @@ const labParams = new URLSearchParams(window.location.search);
 const labState = labParams.get('lab');
 const labGaze = labParams.get('gaze');
 const labMode = Boolean(labState);
+const inspectMode = labParams.get('inspect') === '1';
 const message = document.querySelector('#message');
 const composer = document.querySelector('#composer');
 const messages = document.querySelector('#messages');
@@ -54,7 +55,7 @@ const presenceLine = document.querySelector('#presence-line');
 
 const character = createLivingCharacter(canvas);
 
-if (labMode) {
+if (labMode || inspectMode) {
   window.__ALIVE_TEST__ = {
     blink: () => character.blink(),
     setGaze: (x, y) => character.setAttention(x, y),
