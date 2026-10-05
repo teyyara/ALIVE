@@ -39,10 +39,17 @@ try {
   page.on('pageerror', error => pageErrors.push(error.message));
 
   const states = ['idle', 'attentive', 'listening', 'thinking', 'speaking', 'warm', 'curious', 'playful'];
+  const specialStates = ['blink'];
 
   for (const state of states) {
     await page.goto(`http://127.0.0.1:4173/?lab=${state}`, { waitUntil: 'networkidle' });
     await page.waitForTimeout(350);
+    await page.screenshot({ path: `${output}/${state}.png`, fullPage: true });
+  }
+
+  for (const state of specialStates) {
+    await page.goto(`http://127.0.0.1:4173/?lab=${state}`, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(330);
     await page.screenshot({ path: `${output}/${state}.png`, fullPage: true });
   }
 
@@ -55,11 +62,19 @@ try {
   await page.waitForTimeout(350);
   await page.screenshot({ path: `${output}/interaction-right.png`, fullPage: true });
 
+  await page.goto('http://127.0.0.1:4173/?inspect=1', { waitUntil: 'networkidle' });
+  await page.locator('#message').fill('Hello ALIVE');
+  await page.locator('#composer button').click();
+  await page.waitForTimeout(1100);
+  await page.screenshot({ path: `${output}/conversation.png`, fullPage: true });
+  const conversationText = await page.locator('#messages').innerText();
+
   const testState = await page.evaluate(() => window.__ALIVE_TEST__?.getCharacter?.() ?? null);
   await writeFile(`${output}/diagnostics.json`, JSON.stringify({
     consoleErrors,
     pageErrors,
     character: testState,
+    conversationText,
     serverLogs: logs
   }, null, 2));
 
