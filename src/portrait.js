@@ -1,5 +1,3 @@
-const SOURCE = Object.freeze({ width: 1020, height: 842 });
-
 const STATE_MOTION = Object.freeze({
   idle: 1,
   attentive: 1.15,
@@ -157,6 +155,9 @@ export function createLivingPortrait(canvas, fallbackImage) {
   let speech = 0;
   let width = 1;
   let height = 1;
+  let gridCount = 0;
+  let uniforms = null;
+  let resizeObserver = null;
 
   try {
     gl = canvas.getContext('webgl2', {
@@ -188,14 +189,13 @@ export function createLivingPortrait(canvas, fallbackImage) {
     if (canvas.width !== width || canvas.height !== height) {
       canvas.width = width;
       canvas.height = height;
+      gl.viewport(0, 0, width, height);
     }
-    gl.viewport(0, 0, width, height);
   };
 
   const draw = (time) => {
     if (destroyed) return;
 
-    setCanvasSize();
     attentionX += (targetAttentionX - attentionX) * .075;
     attentionY += (targetAttentionY - attentionY) * .075;
     speech *= .9;
@@ -205,10 +205,10 @@ export function createLivingPortrait(canvas, fallbackImage) {
     gl.useProgram(program);
     gl.bindVertexArray(vao);
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_time'), time * 0.001);
-    gl.uniform1f(gl.getUniformLocation(program, 'u_motion'), stateMotion);
-    gl.uniform2f(gl.getUniformLocation(program, 'u_attention'), attentionX, attentionY);
-    gl.uniform1f(gl.getUniformLocation(program, 'u_speech'), speech);
+    gl.uniform1f(uniforms.time, time * 0.001);
+    gl.uniform1f(uniforms.motion, stateMotion);
+    gl.uniform2f(uniforms.attention, attentionX, attentionY);
+    gl.uniform1f(uniforms.speech, speech);
 
     gl.drawElements(gl.TRIANGLES, gridCount, gl.UNSIGNED_INT, 0);
     gl.bindVertexArray(null);
@@ -219,6 +219,13 @@ export function createLivingPortrait(canvas, fallbackImage) {
   const init = async () => {
     try {
       program = createProgram(gl);
+      uniforms = {
+        time: gl.getUniformLocation(program, 'u_time'),
+        motion: gl.getUniformLocation(program, 'u_motion'),
+        attention: gl.getUniformLocation(program, 'u_attention'),
+        speech: gl.getUniformLocation(program, 'u_speech'),
+        texture: gl.getUniformLocation(program, 'u_texture')
+      };
       const grid = createGrid();
       gridCount = grid.indices.length;
 
@@ -265,11 +272,14 @@ export function createLivingPortrait(canvas, fallbackImage) {
       gl.useProgram(program);
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, texture);
-      gl.uniform1i(gl.getUniformLocation(program, 'u_texture'), 0);
+      gl.uniform1i(uniforms.texture, 0);
 
       ready = true;
       fallbackImage.hidden = true;
       canvas.hidden = false;
+      setCanvasSize();
+      resizeObserver = new ResizeObserver(setCanvasSize);
+      resizeObserver.observe(canvas);
       frameId = requestAnimationFrame(draw);
     } catch (error) {
       canvas.hidden = true;
@@ -277,8 +287,6 @@ export function createLivingPortrait(canvas, fallbackImage) {
       console.error('ALIVE portrait mesh failed:', error);
     }
   };
-
-  let gridCount = 0;
 
   init();
 
@@ -299,6 +307,7 @@ export function createLivingPortrait(canvas, fallbackImage) {
     destroy() {
       destroyed = true;
       window.cancelAnimationFrame(frameId);
+      resizeObserver?.disconnect();
       if (texture) gl.deleteTexture(texture);
       if (vao) gl.deleteVertexArray(vao);
       if (program) gl.deleteProgram(program);
