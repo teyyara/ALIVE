@@ -63,6 +63,11 @@ export function createLivingCharacter(canvas) {
   let state = 'idle';
   let voicePulse = 0;
   let breathTime = Math.random() * Math.PI * 2;
+  let headSettleX = 0;
+  let headSettleY = 0;
+  let settleTargetX = 0;
+  let settleTargetY = 0;
+  let settleTimer = 0;
   let width = 0;
   let height = 0;
   let scale = 1;
@@ -104,6 +109,16 @@ export function createLivingCharacter(canvas) {
       autonomousY = (Math.random() * 2 - 1) * .14;
       scheduleAutonomousGaze(now + 1);
     }, 4200 + Math.random() * 5200);
+  }
+
+  function scheduleHeadSettle() {
+    if (destroyed) return;
+    window.clearTimeout(settleTimer);
+    settleTimer = window.setTimeout(() => {
+      settleTargetX = (Math.random() * 2 - 1) * .65;
+      settleTargetY = (Math.random() * 2 - 1) * .28;
+      scheduleHeadSettle();
+    }, 5200 + Math.random() * 6200);
   }
 
   function blinkNow() {
@@ -232,6 +247,8 @@ export function createLivingCharacter(canvas) {
 
     gazeX += (desiredX - gazeX) * .085;
     gazeY += (desiredY - gazeY) * .085;
+    headSettleX += (settleTargetX - headSettleX) * .025;
+    headSettleY += (settleTargetY - headSettleY) * .025;
     blink += (blinkTarget - blink) * .40;
     voicePulse *= .90;
 
@@ -242,8 +259,11 @@ export function createLivingCharacter(canvas) {
     const t = timeMs * .001;
     breathTime += .014;
     const breath = .5 + .5 * Math.sin(breathTime * .9);
-    const headX = gazeX * 2.6 + current.head * .65;
-    const headY = gazeY * 1.7;
+    const headX = gazeX * 2.6 + current.head * .65 + headSettleX;
+    const headY = gazeY * 1.7 + headSettleY;
+    const breathPhase = breathTime * .9;
+    const leftShoulder = Math.sin(breathPhase) * .9;
+    const rightShoulder = Math.sin(breathPhase + .18) * .9;
     const bodyY = -breath * (1.0 + current.breath * .9);
 
     context.clearRect(0, 0, width, height);
@@ -258,7 +278,7 @@ export function createLivingCharacter(canvas) {
 
     drawLayer('base');
     drawLayer('body', 0, bodyY, 1, 1 + breath * .003, 0, 1, 510, 690);
-    drawLayer('face', headX, headY, 1, 1, current.head * .0032, 1, 510, 400);
+    drawLayer('face', headX, headY, 1, 1, current.head * .0032 + (headSettleX * .0007), 1, 510, 400);
 
     const eyeY = headY;
     const irisX = gazeX * 8.5 + headX;
@@ -271,8 +291,8 @@ export function createLivingCharacter(canvas) {
     drawLayer('rightIris', irisX, irisY, 1, 1, 0, 1, LANDMARKS.rightEye[0], LANDMARKS.rightEye[1]);
 
     const browLift = current.brow * -3.5 - gazeY * .7;
-    drawLayer('leftBrow', headX * .78, eyeY + browLift, 1, 1, current.head * .003, 1, 510, 290);
-    drawLayer('rightBrow', headX * .78, eyeY + browLift, 1, 1, current.head * .003, 1, 510, 290);
+    drawLayer('leftBrow', headX * .78 + leftShoulder * .06, eyeY + browLift, 1, 1, current.head * .003, 1, 510, 290);
+    drawLayer('rightBrow', headX * .78 + rightShoulder * .06, eyeY + browLift, 1, 1, current.head * .003, 1, 510, 290);
 
     const mouthOpen = state === 'speaking'
       ? Math.abs(Math.sin(t * 13.5)) * .045 + voicePulse * .026
@@ -299,6 +319,7 @@ export function createLivingCharacter(canvas) {
 
   frameId = requestAnimationFrame(frame);
   scheduleAutonomousGaze(0);
+  scheduleHeadSettle();
   setState('idle');
 
   return {
@@ -310,6 +331,7 @@ export function createLivingCharacter(canvas) {
       destroyed = true;
       window.cancelAnimationFrame(frameId);
       window.clearTimeout(autonomousTimer);
+      window.clearTimeout(settleTimer);
     }
   };
 }
