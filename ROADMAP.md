@@ -56,7 +56,7 @@ The room becomes responsive.
 - time of day ✅
 - moon cycle ✅
 - weather
-- environmental motion
+- environmental motion ✅
 - lighting state
 - persistent small details
 
