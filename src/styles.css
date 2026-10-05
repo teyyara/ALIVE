@@ -85,17 +85,17 @@ button { color: inherit; }
   filter: drop-shadow(0 40px 78px rgba(0,0,0,.40));
   -webkit-mask-image: radial-gradient(
     ellipse at 50% 48%,
-    #000 36%,
-    rgba(0,0,0,.98) 58%,
-    rgba(0,0,0,.62) 73%,
-    transparent 91%
+    #000 31%,
+    rgba(0,0,0,.96) 52%,
+    rgba(0,0,0,.46) 68%,
+    transparent 82%
   );
   mask-image: radial-gradient(
     ellipse at 50% 48%,
-    #000 36%,
-    rgba(0,0,0,.98) 58%,
-    rgba(0,0,0,.62) 73%,
-    transparent 91%
+    #000 31%,
+    rgba(0,0,0,.96) 52%,
+    rgba(0,0,0,.46) 68%,
+    transparent 82%
   );
 }
 
@@ -141,15 +141,15 @@ button { color: inherit; }
 
 @keyframes alive-head {
   0%, 100% { transform: translate3d(0,0,0) rotate(0deg) scale(1); }
-  36% { transform: translate3d(.35px,-1px,0) rotate(-.08deg) scale(1.001); }
-  63% { transform: translate3d(-.45px,-.45px,0) rotate(.07deg) scale(1); }
+  36% { transform: translate3d(.6px,-1.7px,0) rotate(-.14deg) scale(1.002); }
+  63% { transform: translate3d(-.8px,-.7px,0) rotate(.12deg) scale(1); }
 }
 
 @keyframes alive-speaking-head {
   0%, 100% { transform: translate3d(0,0,0) rotate(0deg) scale(1); }
-  27% { transform: translate3d(.28px,-.55px,0) rotate(-.04deg) scale(1.0008); }
-  56% { transform: translate3d(-.24px,.1px,0) rotate(.035deg) scale(1); }
-  78% { transform: translate3d(.16px,-.3px,0) rotate(-.02deg) scale(1.0004); }
+  27% { transform: translate3d(.48px,-.9px,0) rotate(-.07deg) scale(1.0012); }
+  56% { transform: translate3d(-.38px,.14px,0) rotate(.055deg) scale(1); }
+  78% { transform: translate3d(.28px,-.55px,0) rotate(-.04deg) scale(1.0007); }
 }
 
 .alive[data-state="speaking"] .portrait-head {
