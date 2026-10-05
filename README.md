@@ -32,3 +32,10 @@ The current runtime does not require API credits.
 Do not add decorative effects unless the character already feels alive with the environment quiet.
 
 The first test is always a silent five-second observation.
+
+
+## Current visual foundation
+
+The active character renderer is intentionally photographic. `src/character.js` draws the clean high-resolution portrait as the single visual foundation, applies a small local vertical displacement to the lower body to create inhale/exhale motion, and overlays independent iris layers so the eyes can look around without moving the photograph as a card.
+
+The face and room are not split into dozens of fragile cutouts. That decision is deliberate: preserving the original photographic texture and silhouette is more convincing than a visibly assembled puppet.
