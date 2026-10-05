@@ -11,7 +11,9 @@ function readMemory() {
 export function createPresenceMemory() {
   const previous = readMemory();
   const visitCount = Number.isFinite(previous.visitCount) ? previous.visitCount + 1 : 1;
-  const returning = visitCount > 1;
+  const previousLastSeen = Date.parse(previous.lastSeen || '');
+  const awayForMs = Number.isFinite(previousLastSeen) ? Math.max(0, Date.now() - previousLastSeen) : Infinity;
+  const returning = visitCount > 1 && awayForMs >= 5 * 60 * 1000;
 
   const memory = {
     visitCount,
@@ -28,6 +30,7 @@ export function createPresenceMemory() {
   return Object.freeze({
     visitCount,
     returning,
-    firstVisit: visitCount === 1
+    firstVisit: visitCount === 1,
+    awayForMs
   });
 }
