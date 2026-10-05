@@ -1,0 +1,90 @@
+name: ALIVE self-view
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'public/assets/**'
+      - 'index.html'
+      - '.github/workflows/alive-self-view.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install app dependencies
+        run: npm install
+
+      - name: Install Playwright
+        run: |
+          python3 -m pip install playwright
+          python3 -m playwright install --with-deps chromium
+
+      - name: Start static server
+        run: |
+          python3 -m http.server 4173 --directory . >/tmp/alive-server.log 2>&1 &
+          echo $! > /tmp/alive-server.pid
+
+      - name: Run self-view lab
+        run: |
+          python3 - <<'PY'
+          from playwright.sync_api import sync_playwright
+          import json
+          from pathlib import Path
+          
+          out = Path("lab/latest")
+          out.mkdir(parents=True, exist_ok=True)
+          errors = []
+          
+          states = [
+              ("idle", "center"),
+              ("curious", "left"),
+              ("thinking", "right"),
+              ("speaking", "center"),
+              ("blink", "center"),
+          ]
+          
+          with sync_playwright() as p:
+              browser = p.chromium.launch(headless=True)
+              page = browser.new_page(viewport={"width": 1440, "height": 1000}, device_scale_factor=1)
+              page.on("pageerror", lambda e: errors.append({"type": "pageerror", "text": str(e)}))
+              page.on("console", lambda m: errors.append({"type": m.type, "text": m.text}) if m.type in {"error", "warning"} else None)
+              
+              for state, gaze in states:
+                  page.goto(f"http://127.0.0.1:4173/?lab={state}&gaze={gaze}", wait_until="domcontentloaded")
+                  page.wait_for_timeout(700)
+                  page.screenshot(path=str(out / f"{state}-{gaze}.png"), full_page=True)
+              
+              page.goto("http://127.0.0.1:4173/?lab=idle&gaze=center", wait_until="domcontentloaded")
+              page.mouse.move(720, 410)
+              page.wait_for_timeout(300)
+              page.locator("#message").fill("hello ALIVE")
+              page.wait_for_timeout(250)
+              page.screenshot(path=str(out / "typing.png"), full_page=True)
+              
+              browser.close()
+          
+          Path("lab/latest/browser-errors.json").write_text(json.dumps(errors, indent=2))
+          if errors:
+              raise SystemExit(f"Browser reported {len(errors)} errors/warnings. See lab/latest/browser-errors.json")
+          PY
+
+      - name: Commit latest visual snapshots
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lab/latest
+          git diff --cached --quiet && exit 0
+          git commit -m "chore: refresh ALIVE self-view snapshots [skip ci]"
+          git push
