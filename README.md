@@ -15,6 +15,7 @@ The repository is intentionally small at first. The goal is not a conventional c
 - rare passing city-light environmental events
 - state-reactive portrait lighting
 - adaptive local microphone noise floor
+- speech-boundary room response
 - rare organic double-blink behavior
 - typing-aware room response
 - optional browser voice output and direct microphone recording
