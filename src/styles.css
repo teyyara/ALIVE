@@ -108,8 +108,23 @@ button { color: inherit; }
 
 .portrait-base {
   object-fit: cover;
-  border-radius: 22px;
-  box-shadow: 0 30px 100px rgba(0,0,0,.42);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.portrait-breath {
+  z-index: 1;
+  transform-origin: 50% 78%;
+  will-change: transform;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 46%, rgba(0,0,0,.14) 51%, #000 59%, #000 100%);
+  mask-image: linear-gradient(to bottom, transparent 46%, rgba(0,0,0,.14) 51%, #000 59%, #000 100%);
+  animation: alive-breath 5.8s ease-in-out infinite;
+}
+
+@keyframes alive-breath {
+  0%, 100% { transform: translateY(0) scale(1); }
+  42% { transform: translateY(-1.6px) scale(1.006); }
+  58% { transform: translateY(-1px) scale(1.004); }
 }
 
 #character-canvas {
@@ -267,3 +282,5 @@ button { color: inherit; }
   }
   #character-canvas { filter: none !important; }
 }
+
+html[data-lab="1"] .portrait-breath { animation: none; transform: translateY(-.7px) scale(1.003); }
