@@ -84,20 +84,23 @@ button { color: inherit; }
   aspect-ratio: 1020 / 842;
   filter: drop-shadow(0 40px 78px rgba(0,0,0,.40));
   -webkit-mask-image: radial-gradient(
-    ellipse at 50% 46%,
-    #000 54%,
-    rgba(0,0,0,.94) 72%,
-    transparent 100%
+    ellipse at 50% 48%,
+    #000 36%,
+    rgba(0,0,0,.98) 58%,
+    rgba(0,0,0,.62) 73%,
+    transparent 91%
   );
   mask-image: radial-gradient(
-    ellipse at 50% 46%,
-    #000 54%,
-    rgba(0,0,0,.94) 72%,
-    transparent 100%
+    ellipse at 50% 48%,
+    #000 36%,
+    rgba(0,0,0,.98) 58%,
+    rgba(0,0,0,.62) 73%,
+    transparent 91%
   );
 }
 
 .portrait-base,
+.portrait-breath,
 #character-canvas {
   position: absolute;
   inset: 0;
