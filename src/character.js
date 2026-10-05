@@ -123,19 +123,36 @@ export function createLivingCharacter(canvas) {
     offsetY = (height - 842 * scale) * .5;
   }
 
-  function drawLayer(name, dx = 0, dy = 0, sx = 1, sy = 1, rotation = 0, alpha = 1) {
+  function drawLayer(
+    name,
+    dx = 0,
+    dy = 0,
+    sx = 1,
+    sy = 1,
+    rotation = 0,
+    alpha = 1,
+    pivotX = 510,
+    pivotY = 421
+  ) {
     const image = images[name];
     if (!image) return;
-    const [baseX, baseY] = POSITIONS[name];
-    const x = offsetX + (baseX + dx) * scale;
-    const y = offsetY + (baseY + dy) * scale;
+
+    const x = offsetX + dx * scale;
+    const y = offsetY + dy * scale;
 
     context.save();
     context.globalAlpha = alpha;
-    context.translate(x, y);
+    context.translate(x + pivotX * scale, y + pivotY * scale);
     context.rotate(rotation);
     context.scale(sx, sy);
-    context.drawImage(image, 0, 0, image.naturalWidth * scale, image.naturalHeight * scale);
+    context.translate(-pivotX * scale, -pivotY * scale);
+    context.drawImage(
+      image,
+      0,
+      0,
+      image.naturalWidth * scale,
+      image.naturalHeight * scale
+    );
     context.restore();
   }
 
@@ -222,28 +239,28 @@ export function createLivingCharacter(canvas) {
     context.imageSmoothingQuality = 'high';
 
     drawLayer('base');
-    drawLayer('body', 0, bodyY, 1, 1 + breath * .003);
-    drawLayer('face', headX, headY, 1, 1, current.head * .0018);
+    drawLayer('body', 0, bodyY, 1, 1 + breath * .003, 0, 1, 510, 690);
+    drawLayer('face', headX, headY, 1, 1, current.head * .0032, 1, 510, 400);
 
     const eyeY = headY;
     const irisX = gazeX * 8.5 + headX;
     const irisY = gazeY * 5.2 + eyeY;
     const eyeScaleY = 1;
 
-    drawLayer('leftEye', headX, eyeY, 1, eyeScaleY, 0, 1);
-    drawLayer('rightEye', headX, eyeY, 1, eyeScaleY, 0, 1);
-    drawLayer('leftIris', irisX, irisY, 1, 1, 0, 1);
-    drawLayer('rightIris', irisX, irisY, 1, 1, 0, 1);
+    drawLayer('leftEye', headX, eyeY, 1, eyeScaleY, current.head * .003, 1, LANDMARKS.leftEye[0], LANDMARKS.leftEye[1]);
+    drawLayer('rightEye', headX, eyeY, 1, eyeScaleY, current.head * .003, 1, LANDMARKS.rightEye[0], LANDMARKS.rightEye[1]);
+    drawLayer('leftIris', irisX, irisY, 1, 1, 0, 1, LANDMARKS.leftEye[0], LANDMARKS.leftEye[1]);
+    drawLayer('rightIris', irisX, irisY, 1, 1, 0, 1, LANDMARKS.rightEye[0], LANDMARKS.rightEye[1]);
 
     const browLift = current.brow * -3.5 - gazeY * .7;
-    drawLayer('leftBrow', headX * .78, eyeY + browLift, 1, 1, current.head * .0018, 1);
-    drawLayer('rightBrow', headX * .78, eyeY + browLift, 1, 1, current.head * .0018, 1);
+    drawLayer('leftBrow', headX * .78, eyeY + browLift, 1, 1, current.head * .003, 1, 510, 290);
+    drawLayer('rightBrow', headX * .78, eyeY + browLift, 1, 1, current.head * .003, 1, 510, 290);
 
     const mouthOpen = state === 'speaking'
       ? Math.abs(Math.sin(t * 13.5)) * .045 + voicePulse * .026
       : voicePulse * .01;
     const mouthLift = -current.smile * 2.3;
-    drawLayer('mouth', headX * .55, eyeY + mouthLift, 1 + current.smile * .018, 1 + mouthOpen, current.head * .001, 1);
+    drawLayer('mouth', headX * .55, eyeY + mouthLift, 1 + current.smile * .032, 1 + mouthOpen, current.head * .002, 1, 510, 465);
 
     if (blink > .02) {
       drawClosedEye(LANDMARKS.leftEye[0] + headX, LANDMARKS.leftEye[1] + headY, skinLeft);
