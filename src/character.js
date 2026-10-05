@@ -59,6 +59,8 @@ export function createLivingCharacter(canvas) {
   let gazeY = 0;
   let autonomousX = 0;
   let autonomousY = 0;
+  let stateGazeX = 0;
+  let stateGazeY = 0;
   let autonomousTimer = 0;
   let blink = 0;
   let blinkTarget = 0;
@@ -90,9 +92,21 @@ export function createLivingCharacter(canvas) {
     playful: { smile: .42, brow: .25, head: -1.0, breath: .20 }
   };
 
+  const stateGazeBias = {
+    idle: [0, 0],
+    attentive: [0, -0.02],
+    listening: [0, 0],
+    thinking: [-0.10, -0.08],
+    speaking: [0, 0],
+    warm: [0.02, 0],
+    curious: [0.05, -0.04],
+    playful: [0.08, -0.01]
+  };
+
   function setState(next) {
     state = stateTargets[next] ? next : 'idle';
     Object.assign(target, stateTargets[state]);
+    [stateGazeX, stateGazeY] = stateGazeBias[state] || [0, 0];
   }
 
   function setAttention(x, y) {
@@ -182,11 +196,18 @@ export function createLivingCharacter(canvas) {
     resize();
 
     const activeX = Math.abs(targetX) > .06 || Math.abs(targetY) > .06;
-    const desiredX = activeX ? targetX : autonomousX;
-    const desiredY = activeX ? targetY : autonomousY;
+    const desiredX = activeX
+      ? targetX * .92 + stateGazeX * .08
+      : autonomousX + stateGazeX;
+    const desiredY = activeX
+      ? targetY * .92 + stateGazeY * .08
+      : autonomousY + stateGazeY;
 
-    gazeX += (desiredX - gazeX) * .085;
-    gazeY += (desiredY - gazeY) * .085;
+    const eyeEase = activeX ? .17 : .105;
+    const headEase = activeX ? .055 : .045;
+
+    gazeX += (desiredX - gazeX) * eyeEase;
+    gazeY += (desiredY - gazeY) * eyeEase;
     headSettleX += (settleTargetX - headSettleX) * .025;
     headSettleY += (settleTargetY - headSettleY) * .025;
     blink += (blinkTarget - blink) * .40;
@@ -224,10 +245,12 @@ export function createLivingCharacter(canvas) {
     const irisY = gazeY * 4.4 + eyeY;
     const eyeScaleY = 1;
 
-    drawLayer('leftEye', 0, 0, 1, eyeScaleY, 0, 1);
-    drawLayer('rightEye', 0, 0, 1, eyeScaleY, 0, 1);
-    drawLayer('leftIris', irisX, irisY, 1, 1, 0, 1);
-    drawLayer('rightIris', irisX, irisY, 1, 1, 0, 1);
+    const lidCompression = state === 'thinking' ? .985 : state === 'listening' ? .992 : 1;
+    drawLayer('leftEye', 0, 0, 1, lidCompression, 0, 1);
+    drawLayer('rightEye', 0, 0, 1, lidCompression, 0, 1);
+    const irisScale = state === 'curious' ? 1.012 : state === 'thinking' ? .996 : 1;
+    drawLayer('leftIris', irisX, irisY, irisScale, irisScale, 0, 1);
+    drawLayer('rightIris', irisX, irisY, irisScale, irisScale, 0, 1);
 
     const browLift = current.brow * -3.5 - gazeY * .7;
     drawLayer('leftBrow', featureX * .78 + leftShoulder * .05, browLift + eyeY, 1, 1, current.head * .002, 1);
