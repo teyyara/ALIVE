@@ -54,7 +54,7 @@ void main() {
   p.x = (p.x - pivot) * chestWidth + pivot;
 
   gl_Position = vec4(p, 0.0, 1.0);
-  v_uv = a_uv;
+  v_uv = vec2(a_uv.x, 1.0 - a_uv.y);
 }
 `;
 
@@ -252,7 +252,7 @@ export function createLivingPortrait(canvas, fallbackImage) {
 
       texture = gl.createTexture();
       gl.bindTexture(gl.TEXTURE_2D, texture);
-      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
