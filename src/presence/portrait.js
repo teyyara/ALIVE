@@ -16,6 +16,7 @@ precision mediump float;
 uniform sampler2D u_texture;
 uniform float u_time;
 uniform vec2 u_gaze;
+uniform vec4 u_expression;
 uniform float u_blink;
 uniform float u_speech;
 uniform float u_ready;
@@ -162,6 +163,8 @@ export function createLivingPortrait(canvas, src) {
   let blinkCurrent = 0;
   let gazeX = 0;
   let gazeY = 0;
+  let expressionSmile = 0.18;
+  let expressionThought = 0;
   let speech = 0;
   let ready = 0;
   let gl = null;
@@ -186,6 +189,7 @@ export function createLivingPortrait(canvas, src) {
 
       gl.uniform1f(uniforms.time, time);
       gl.uniform2f(uniforms.gaze, gazeX, gazeY);
+      gl.uniform4f(uniforms.expression, expressionSmile, expressionThought, 0, 0);
       gl.uniform1f(uniforms.blink, blinkCurrent);
       gl.uniform1f(uniforms.speech, speech);
       gl.uniform1f(uniforms.ready, ready);
@@ -301,6 +305,7 @@ export function createLivingPortrait(canvas, src) {
         uniforms = {
           time: gl.getUniformLocation(program, 'u_time'),
           gaze: gl.getUniformLocation(program, 'u_gaze'),
+          expression: gl.getUniformLocation(program, 'u_expression'),
           blink: gl.getUniformLocation(program, 'u_blink'),
           speech: gl.getUniformLocation(program, 'u_speech'),
           ready: gl.getUniformLocation(program, 'u_ready'),
@@ -334,6 +339,11 @@ export function createLivingPortrait(canvas, src) {
     setAttention(x, y) {
       gazeX = Math.max(-1, Math.min(1, Number(x) || 0));
       gazeY = Math.max(-1, Math.min(1, Number(y) || 0));
+    },
+
+    setExpression(smile = 0.18, thought = 0) {
+      expressionSmile = Number(smile) || 0;
+      expressionThought = Number(thought) || 0;
     },
 
     blink() {
