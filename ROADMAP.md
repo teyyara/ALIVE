@@ -41,6 +41,7 @@ Voice becomes part of the character rather than a separate utility.
 - interruption handling ✅
 - listening / speaking handoff ✅
 - sound design and room response
+- adaptive local microphone sensing
 
 ## 05 — Mind
 The local prototype connects to a real conversational model.
