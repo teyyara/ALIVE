@@ -24,6 +24,8 @@ export async function recordVoice({ onStart, onStop, onError, onLevel, maxDurati
   let analyser;
   let levelFrame;
   let heardSpeech = false;
+  let noiseFloor = 0.012;
+  let noiseSamples = 0;
 
   try {
     audioContext = new AudioContext();
@@ -49,9 +51,16 @@ export async function recordVoice({ onStart, onStop, onError, onLevel, maxDurati
       const rms = Math.sqrt(sum / data.length);
       const level = Math.min(1, rms * 3.6);
 
+      if (!heardSpeech && noiseSamples < 36) {
+        noiseFloor = noiseFloor * 0.92 + level * 0.08;
+        noiseSamples += 1;
+      }
+
       onLevel?.(level);
 
-      if (level > 0.055) {
+      const speechThreshold = Math.max(0.045, Math.min(0.12, noiseFloor + 0.028));
+
+      if (level > speechThreshold) {
         heardSpeech = true;
         window.clearTimeout(silenceTimer);
       } else if (heardSpeech) {
