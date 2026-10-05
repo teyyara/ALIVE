@@ -455,6 +455,49 @@ button { color: inherit; }
   place-items: center;
 }
 
+.portrait-attention {
+  position: absolute;
+  inset: 0;
+  border-radius: 34px;
+  pointer-events: none;
+  z-index: 3;
+  overflow: hidden;
+  opacity: .72;
+  mix-blend-mode: screen;
+  transition: opacity .8s ease;
+}
+
+.attention-glint {
+  position: absolute;
+  top: 34%;
+  width: 82px;
+  height: 52px;
+  transform:
+    translate3d(var(--glint-x, 0px), var(--glint-y, 0px), 0)
+    translate(-50%, -50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(255,244,230,.18) 0,
+      rgba(255,220,190,.08) 20%,
+      transparent 63%
+    );
+  filter: blur(8px);
+  transition: transform .42s cubic-bezier(.2,.7,.2,1);
+}
+
+.attention-glint.left { left: 37.5%; }
+.attention-glint.right { left: 62.5%; }
+
+.attention-held .portrait-attention {
+  opacity: .9;
+}
+
+.attention-held .attention-glint {
+  filter: blur(6px);
+}
+
 .character-shell {
   position: relative;
   width: min(88%, 560px);
