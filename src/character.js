@@ -224,7 +224,7 @@ export function createLivingCharacter(canvas) {
       loaded = false;
     });
 
-  frame();
+  frame(performance.now());
 
   return {
     setAttention,
