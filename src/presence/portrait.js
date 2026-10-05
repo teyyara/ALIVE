@@ -155,6 +155,7 @@ export function createLivingPortrait(canvas, src) {
   let texture = null;
   let fallbackContext = null;
   let image = null;
+  let uniforms = null;
 
   const render = (timeMs) => {
     if (destroyed) return;
@@ -169,11 +170,11 @@ export function createLivingPortrait(canvas, src) {
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.useProgram(program);
 
-      gl.uniform1f(gl.getUniformLocation(program, 'u_time'), time);
-      gl.uniform2f(gl.getUniformLocation(program, 'u_gaze'), gazeX, gazeY);
-      gl.uniform1f(gl.getUniformLocation(program, 'u_blink'), blinkCurrent);
-      gl.uniform1f(gl.getUniformLocation(program, 'u_speech'), speech);
-      gl.uniform1f(gl.getUniformLocation(program, 'u_ready'), ready);
+      gl.uniform1f(uniforms.time, time);
+      gl.uniform2f(uniforms.gaze, gazeX, gazeY);
+      gl.uniform1f(uniforms.blink, blinkCurrent);
+      gl.uniform1f(uniforms.speech, speech);
+      gl.uniform1f(uniforms.ready, ready);
 
       const imageAspect = image.width / Math.max(1, image.height);
       const viewAspect = canvas.width / Math.max(1, canvas.height);
@@ -181,11 +182,7 @@ export function createLivingPortrait(canvas, src) {
         ? [viewAspect / imageAspect, 1]
         : [1, imageAspect / viewAspect];
 
-      gl.uniform2f(
-        gl.getUniformLocation(program, 'u_coverScale'),
-        coverScale[0],
-        coverScale[1]
-      );
+      gl.uniform2f(uniforms.coverScale, coverScale[0], coverScale[1]);
 
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     } else if (fallbackContext && image?.complete) {
@@ -284,12 +281,22 @@ export function createLivingPortrait(canvas, src) {
           image
         );
 
+        uniforms = {
+          time: gl.getUniformLocation(program, 'u_time'),
+          gaze: gl.getUniformLocation(program, 'u_gaze'),
+          blink: gl.getUniformLocation(program, 'u_blink'),
+          speech: gl.getUniformLocation(program, 'u_speech'),
+          ready: gl.getUniformLocation(program, 'u_ready'),
+          coverScale: gl.getUniformLocation(program, 'u_coverScale')
+        };
+
         ready = 1;
         canvas.classList.add('portrait-ready');
       } catch {
         gl = null;
         program = null;
         texture = null;
+        uniforms = null;
         fallbackContext = canvas.getContext('2d');
         canvas.classList.add('portrait-fallback');
       }
@@ -332,6 +339,7 @@ export function createLivingPortrait(canvas, src) {
       gl = null;
       program = null;
       texture = null;
+      uniforms = null;
     }
   };
 }
