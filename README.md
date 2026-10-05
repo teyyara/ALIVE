@@ -12,6 +12,7 @@ The repository is intentionally small at first. The goal is not a conventional c
 - pointer-aware parallax and sustained-attention response
 - restrained portrait depth planes
 - time-of-day room atmospheres and moon cycle
+- rare passing city-light environmental events
 - state-reactive portrait lighting
 - adaptive local microphone noise floor
 - rare organic double-blink behavior
