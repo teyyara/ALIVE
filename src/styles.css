@@ -385,3 +385,28 @@ html[data-lab="1"] .portrait-breath { animation: none; transform: translateY(-.7
 .alive[data-state="speaking"] .portrait-head {
   filter: brightness(1.008) saturate(1.008);
 }
+
+@keyframes alive-attentive-head {
+  0%, 100% { transform: translate3d(0,0,0) rotate(0deg) scale(1); }
+  42% { transform: translate3d(-.45px,-1.05px,0) rotate(.11deg) scale(1.001); }
+  72% { transform: translate3d(.15px,-.3px,0) rotate(-.04deg) scale(1); }
+}
+@keyframes alive-thinking-head {
+  0% { transform: translate3d(0,0,0) rotate(0deg) scale(1); }
+  38% { transform: translate3d(.7px,.9px,0) rotate(.16deg) scale(1.0015); }
+  100% { transform: translate3d(0,0,0) rotate(.02deg) scale(1); }
+}
+@keyframes alive-curious-head {
+  0% { transform: translate3d(0,0,0) rotate(0deg) scale(1); }
+  45% { transform: translate3d(-.9px,-1.3px,0) rotate(.17deg) scale(1.002); }
+  100% { transform: translate3d(0,0,0) rotate(0deg) scale(1); }
+}
+@keyframes alive-playful-head {
+  0%,100% { transform: translate3d(0,0,0) rotate(0deg) scale(1); }
+  50% { transform: translate3d(.8px,-1px,0) rotate(-.18deg) scale(1.002); }
+}
+.alive[data-state="attentive"] .portrait-head { animation: alive-attentive-head 1.4s ease-out 1; }
+.alive[data-state="thinking"] .portrait-head { animation: alive-thinking-head 1.7s ease-out 1; }
+.alive[data-state="curious"] .portrait-head { animation: alive-curious-head 1.55s ease-out 1; }
+.alive[data-state="playful"] .portrait-head { animation: alive-playful-head 1.25s ease-in-out 1; }
+.alive[data-state="listening"] .portrait-head { animation-duration: 5.8s; }
