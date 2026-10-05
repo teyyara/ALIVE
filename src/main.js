@@ -6,7 +6,6 @@ const app = document.querySelector('#app');
 app.innerHTML = `
   <main class="alive" data-state="idle">
     <div class="world" aria-hidden="true">
-      <div class="world-image"></div>
       <div class="world-vignette"></div>
       <div class="world-warmth"></div>
     </div>
