@@ -77,6 +77,17 @@ jobs:
                   "height": box["height"] * 0.17,
               }
           
+          def body_clip(page):
+              box = page.locator("#character-stage").bounding_box()
+              if not box:
+                  raise RuntimeError("Character stage has no bounding box.")
+              return {
+                  "x": box["x"] + box["width"] * 0.31,
+                  "y": box["y"] + box["height"] * 0.49,
+                  "width": box["width"] * 0.38,
+                  "height": box["height"] * 0.28,
+              }
+
           with sync_playwright() as p:
               browser = p.chromium.launch(headless=True)
               page = browser.new_page(viewport={"width": 1440, "height": 1000}, device_scale_factor=1)
@@ -90,6 +101,15 @@ jobs:
                   if state in {"idle", "curious"}:
                       page.screenshot(path=str(out / f"eyes-{state}-{gaze}.png"), clip=eye_clip(page))
               
+              # Prove the body is physically changing, not only the eyes.
+              page.goto("http://127.0.0.1:4173/?lab=idle&gaze=center", wait_until="domcontentloaded")
+              page.wait_for_timeout(450)
+              body_a = Path(out / "body-a.png")
+              body_b = Path(out / "body-b.png")
+              page.screenshot(path=str(body_a), clip=body_clip(page))
+              page.wait_for_timeout(1850)
+              page.screenshot(path=str(body_b), clip=body_clip(page))
+
               # Deterministic blink capture, while the eyelid is actually moving.
               page.goto("http://127.0.0.1:4173/?lab=idle&gaze=center", wait_until="domcontentloaded")
               page.wait_for_timeout(450)
@@ -136,6 +156,7 @@ jobs:
               "browser_errors": errors,
               "gaze_eye_region_mean_difference": mean_diff,
               "blink_eye_region_mean_difference": blink_mean,
+              "body_region_mean_difference": body_mean,
               "snapshots": len(list(out.glob("*.png"))),
           }
           Path("lab/latest/browser-errors.json").write_text(json.dumps(diagnostics, indent=2))
@@ -146,6 +167,8 @@ jobs:
               raise SystemExit(f"Eye-region gaze difference is too small: {mean_diff}")
           if blink_mean < 0.10:
               raise SystemExit(f"Eye-region blink difference is too small: {blink_mean}")
+          if body_mean < 0.08:
+              raise SystemExit(f"Body-region motion difference is too small: {body_mean}")
           if errors:
               raise SystemExit(f"Browser reported {len(errors)} errors/warnings.")
           PY
