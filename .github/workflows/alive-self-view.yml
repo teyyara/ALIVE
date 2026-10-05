@@ -13,6 +13,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: alive-self-view
+  cancel-in-progress: true
+
 jobs:
   visual:
     runs-on: ubuntu-latest
@@ -108,9 +112,7 @@ jobs:
                   raise SystemExit(f"Pointer attention did not move character gaze: {gaze_state}")
               
               page.locator("#message").fill("hello ALIVE")
-              page.wait_for_timeout(120)
-              if page.locator("#state-label").inner_text() != "Curious":
-                  raise SystemExit("Typing did not move ALIVE into Curious state.")
+              page.wait_for_function("() => window.__ALIVE_TEST__?.getState?.() === 'curious'", timeout=1500)
               
               page.locator("#composer").evaluate("(form) => form.requestSubmit()")
               page.wait_for_timeout(650)
@@ -160,6 +162,7 @@ jobs:
           git add lab/latest
           git diff --cached --quiet && exit 0
           git commit -m "chore: refresh ALIVE self-view snapshots [skip ci]"
+          git pull --rebase origin main
           git push
 
       - name: Fail when browser reports errors or warnings
