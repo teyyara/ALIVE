@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     return json(res, 503, { error: 'ALIVE mind is not configured yet.' });
   }
 
-  const { messages } = req.body ?? {};
+  const { messages, stream = false } = req.body ?? {};
 
   if (!validMessages(messages)) {
     return json(res, 400, { error: 'Provide up to 12 valid conversation messages.' });
@@ -62,13 +62,73 @@ export default async function handler(req, res) {
       })
     });
 
-    const data = await upstream.json();
-
     if (!upstream.ok) {
+      const data = await upstream.json().catch(() => ({}));
       const message = data?.error?.message || 'The conversation service rejected the request.';
       return json(res, upstream.status, { error: message });
     }
 
+    if (stream) {
+      if (!upstream.body) {
+        return json(res, 502, { error: 'The conversation service returned no stream.' });
+      }
+
+      res.status(200);
+      res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache, no-transform');
+      res.setHeader('Connection', 'keep-alive');
+
+      const reader = upstream.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      const forward = (chunk, flush = false) => {
+        buffer += decoder.decode(chunk, { stream: !flush });
+
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const rawLine of lines) {
+          const line = rawLine.trim();
+
+          if (!line.startsWith('data:')) continue;
+
+          const payload = line.slice(5).trim();
+          if (!payload || payload === '[DONE]') continue;
+
+          try {
+            const event = JSON.parse(payload);
+
+            if (event.type === 'response.output_text.delta' && typeof event.delta === 'string') {
+              res.write(`data: ${JSON.stringify({ type: 'delta', delta: event.delta })}\n\n`);
+            } else if (event.type === 'response.completed') {
+              res.write(`data: ${JSON.stringify({ type: 'done' })}\n\n`);
+            } else if (event.type === 'error') {
+              res.write(`data: ${JSON.stringify({ type: 'error', error: event.message || 'The conversation stream failed.' })}\n\n`);
+            }
+          } catch {
+            // Ignore malformed upstream events.
+          }
+        }
+      };
+
+      try {
+        while (true) {
+          const { value, done } = await reader.read();
+
+          if (done) break;
+          forward(value);
+        }
+
+        forward(new Uint8Array(), true);
+      } finally {
+        res.end();
+      }
+
+      return;
+    }
+
+    const data = await upstream.json();
     const text = typeof data?.output_text === 'string' ? data.output_text.trim() : '';
 
     if (!text) {
