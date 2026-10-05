@@ -36,8 +36,8 @@ The body communicates before language does.
 Voice becomes part of the character rather than a separate utility.
 - better voice selection
 - speech timing
-- interruption handling
-- listening / speaking handoff
+- interruption handling ✅
+- listening / speaking handoff ✅
 - sound design and room response
 
 ## 05 — Mind
