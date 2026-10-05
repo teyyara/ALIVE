@@ -40,6 +40,13 @@ export function createLivingCharacter(canvas) {
 
   let targetX = 0;
   let targetY = 0;
+  let ambientX = 0;
+  let ambientY = 0;
+  let ambientTargetX = 0;
+  let ambientTargetY = 0;
+  let lastAttentionAt = performance.now();
+  let nextAmbientShiftAt = performance.now() + 2600;
+  let ambientHoldUntil = 0;
   let gazeX = 0;
   let gazeY = 0;
   let blink = 0;
@@ -69,6 +76,32 @@ export function createLivingCharacter(canvas) {
   function setAttention(x, y) {
     targetX = clamp(Number(x) || 0, -1, 1);
     targetY = clamp(Number(y) || 0, -1, 1);
+    lastAttentionAt = performance.now();
+    ambientTargetX = 0;
+    ambientTargetY = 0;
+  }
+
+  function updateAmbientGaze(now) {
+    const manuallyAttending = Math.abs(targetX) > .025 || Math.abs(targetY) > .025;
+    if (manuallyAttending || now - lastAttentionAt < 1800) {
+      ambientTargetX = 0;
+      ambientTargetY = 0;
+      ambientHoldUntil = 0;
+      nextAmbientShiftAt = now + 1800;
+    } else if (ambientHoldUntil && now >= ambientHoldUntil) {
+      ambientTargetX = 0;
+      ambientTargetY = 0;
+      ambientHoldUntil = 0;
+      nextAmbientShiftAt = now + 900 + Math.random() * 1500;
+    } else if (!ambientHoldUntil && now >= nextAmbientShiftAt) {
+      const direction = Math.random() < .5 ? -1 : 1;
+      ambientTargetX = direction * (.055 + Math.random() * .10);
+      ambientTargetY = (Math.random() - .5) * .075;
+      ambientHoldUntil = now + 500 + Math.random() * 800;
+    }
+
+    ambientX += (ambientTargetX - ambientX) * .065;
+    ambientY += (ambientTargetY - ambientY) * .065;
   }
 
   function blinkNow() {
@@ -147,12 +180,15 @@ export function createLivingCharacter(canvas) {
     context.restore();
   }
 
-  function frame() {
+  function frame(now) {
     if (destroyed) return;
 
     resize();
-    gazeX += (targetX - gazeX) * .11;
-    gazeY += (targetY - gazeY) * .11;
+    updateAmbientGaze(now);
+    const effectiveX = clamp(targetX + ambientX, -1, 1);
+    const effectiveY = clamp(targetY + ambientY, -1, 1);
+    gazeX += (effectiveX - gazeX) * .11;
+    gazeY += (effectiveY - gazeY) * .11;
     blink += (blinkTarget - blink) * .4;
     speechPulse *= .9;
 
@@ -204,7 +240,7 @@ export function createLivingCharacter(canvas) {
       };
     },
     getDebugState() {
-      return { gazeX, gazeY, blink };
+      return { gazeX, gazeY, blink, ambientX, ambientY };
     },
 
     destroy() {
