@@ -142,6 +142,40 @@ button { color: inherit; }
   animation: alive-head 7.4s ease-in-out infinite;
 }
 
+.portrait-mouth {
+  position: absolute;
+  inset: 0;
+  z-index: 2.5;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  will-change: transform;
+  transform-origin: 50% 53%;
+  -webkit-mask-image: radial-gradient(
+    ellipse 18% 11% at 50% 52.5%,
+    #000 0 26%,
+    rgba(0,0,0,.72) 44%,
+    rgba(0,0,0,.22) 69%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 18% 11% at 50% 52.5%,
+    #000 0 26%,
+    rgba(0,0,0,.72) 44%,
+    rgba(0,0,0,.22) 69%,
+    transparent 100%
+  );
+  opacity: 0;
+}
+
+@keyframes alive-mouth {
+  0%, 100% { transform: translate3d(0,0,0) scaleY(1); }
+  22% { transform: translate3d(.15px,.45px,0) scaleY(.985); }
+  48% { transform: translate3d(-.12px,.1px,0) scaleY(1.008); }
+  71% { transform: translate3d(.18px,.35px,0) scaleY(.99); }
+}
+
 @keyframes alive-head {
   0%, 100% { transform: translate3d(0,0,0) rotate(0deg) scale(1); }
   36% { transform: translate3d(.6px,-1.7px,0) rotate(-.14deg) scale(1.002); }
@@ -330,4 +364,24 @@ html[data-lab="1"] .portrait-breath { animation: none; transform: translateY(-.7
   34% { transform: translate3d(0,-2.8px,0) scale(1.009); }
   58% { transform: translate3d(0,-1.2px,0) scale(1.004); }
   78% { transform: translate3d(0,-2px,0) scale(1.007); }
+}
+
+.alive[data-state="speaking"] .portrait-mouth {
+  opacity: .78;
+  animation: alive-mouth .62s ease-in-out infinite;
+}
+.alive[data-state="warm"] .portrait-base,
+.alive[data-state="warm"] .portrait-breath,
+.alive[data-state="warm"] .portrait-head {
+  filter: brightness(1.012) saturate(1.015);
+}
+.alive[data-state="thinking"] .portrait-base,
+.alive[data-state="thinking"] .portrait-breath,
+.alive[data-state="thinking"] .portrait-head {
+  filter: brightness(.975) saturate(.96);
+}
+.alive[data-state="speaking"] .portrait-base,
+.alive[data-state="speaking"] .portrait-breath,
+.alive[data-state="speaking"] .portrait-head {
+  filter: brightness(1.008) saturate(1.008);
 }
