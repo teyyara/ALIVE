@@ -690,6 +690,55 @@ button { color: inherit; }
   z-index: 0;
 }
 
+.portrait-expression-light {
+  position: absolute;
+  inset: 0;
+  border-radius: 34px;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  background:
+    radial-gradient(circle at 38% 40%, rgba(239, 193, 171, .16), transparent 17%),
+    radial-gradient(circle at 62% 40%, rgba(239, 193, 171, .16), transparent 17%);
+  filter: blur(12px);
+  transform: translate3d(0, 0, 0) scale(.99);
+  transition: opacity .9s ease, transform 1s cubic-bezier(.2,.7,.2,1), background .9s ease;
+}
+
+[data-state="warm"] .portrait-expression-light {
+  opacity: .7;
+}
+
+[data-state="curious"] .portrait-expression-light {
+  opacity: .82;
+  transform: translate3d(.5px, -1px, 0) scale(1.008);
+}
+
+[data-state="listening"] .portrait-expression-light {
+  opacity: .66;
+  animation: listening-expression 2.2s ease-in-out infinite;
+}
+
+[data-state="thinking"] .portrait-expression-light {
+  opacity: .28;
+  background:
+    linear-gradient(115deg, rgba(168, 155, 177, .08), transparent 45%),
+    radial-gradient(circle at 66% 34%, rgba(211, 181, 158, .08), transparent 20%);
+}
+
+[data-state="playful"] .portrait-expression-light {
+  opacity: .92;
+  transform: translate3d(0, -2px, 0) scale(1.012);
+  background:
+    radial-gradient(circle at 38% 39%, rgba(247, 203, 177, .20), transparent 18%),
+    radial-gradient(circle at 64% 38%, rgba(247, 203, 177, .18), transparent 18%);
+}
+
+[data-state="speaking"] .portrait-expression-light {
+  opacity: .54;
+  animation: speaking-expression 1.05s ease-in-out infinite;
+}
+
 .portrait-depth-veil {
   position: absolute;
   inset: 0;
@@ -1004,6 +1053,16 @@ button { color: inherit; }
 
 [data-state="speaking"] .portrait-frame {
   filter: brightness(1.015);
+}
+
+@keyframes listening-expression {
+  0%, 100% { opacity: .48; transform: translateY(0) scale(.996); }
+  50% { opacity: .72; transform: translateY(-1px) scale(1.006); }
+}
+
+@keyframes speaking-expression {
+  0%, 100% { opacity: .42; transform: scale(.998); }
+  50% { opacity: .62; transform: scale(1.008); }
 }
 
 @keyframes listening-ring {
