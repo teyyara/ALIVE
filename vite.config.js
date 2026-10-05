@@ -162,6 +162,7 @@ async function handleChat(req, res, apiKey, model) {
   }
 
   const messages = body?.messages;
+  const stream = Boolean(body?.stream);
 
   if (
     !Array.isArray(messages) ||
@@ -192,7 +193,8 @@ async function handleChat(req, res, apiKey, model) {
         input: messages.map(({ role, content }) => ({
           role,
           content: content.trim()
-        }))
+        })),
+        stream
       })
     });
 
