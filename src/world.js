@@ -1,5 +1,7 @@
 export function createWorldController({ scene }) {
   let timeout;
+  let environmentalTimer;
+  let environmentalEventTimer;
 
   function updateTime() {
     const now = new Date();
@@ -27,6 +29,25 @@ export function createWorldController({ scene }) {
     scene.dataset.moon = String(index);
   }
 
+
+  function scheduleEnvironmentalMotion() {
+    window.clearTimeout(environmentalTimer);
+
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+
+    environmentalTimer = window.setTimeout(() => {
+      if (!document.hidden) {
+        scene.classList.add('city-pass');
+        window.clearTimeout(environmentalEventTimer);
+        environmentalEventTimer = window.setTimeout(() => {
+          scene.classList.remove('city-pass');
+        }, 2700);
+      }
+
+      scheduleEnvironmentalMotion();
+    }, 22_000 + Math.random() * 24_000);
+  }
+
   function visitorArrived() {
     scene.classList.add('visitor-present');
     window.clearTimeout(timeout);
@@ -37,6 +58,7 @@ export function createWorldController({ scene }) {
 
   updateTime();
   updateMoon();
+  scheduleEnvironmentalMotion();
   const clock = window.setInterval(() => {
     updateTime();
     updateMoon();
@@ -47,6 +69,9 @@ export function createWorldController({ scene }) {
     destroy() {
       window.clearInterval(clock);
       window.clearTimeout(timeout);
+      window.clearTimeout(environmentalTimer);
+      window.clearTimeout(environmentalEventTimer);
+      scene.classList.remove('city-pass');
     }
   };
 }
