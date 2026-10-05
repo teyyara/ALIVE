@@ -232,14 +232,6 @@ export function createLivingCharacter(canvas) {
     blink: blinkNow,
     speechPulse: speechPulseNow,
     getDebugState() {
-      return {
-        gazeX,
-        gazeY,
-        blink,
-        speechPulse
-      };
-    },
-    getDebugState() {
       return { gazeX, gazeY, blink, ambientX, ambientY };
     },
 
