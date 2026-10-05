@@ -40,7 +40,11 @@ export function attachVisitorPresence({ scene, setState, getState }) {
       if (getState() === 'curious') setState('warm');
 
       settleTimeout = window.setTimeout(() => {
-        if (getState() === 'warm' && !scene.classList.contains('attention-held')) {
+        if (
+          getState() === 'warm' &&
+          !scene.classList.contains('attention-held') &&
+          !scene.classList.contains('keyboard-present')
+        ) {
           setState('idle');
         }
       }, 3800);
@@ -68,7 +72,9 @@ export function attachVisitorPresence({ scene, setState, getState }) {
 
     slowTimeout = window.setTimeout(() => {
       scene.classList.remove('visitor-present');
-      if (getState() === 'warm') setState('idle');
+      if (getState() === 'warm' && !scene.classList.contains('keyboard-present')) {
+        setState('idle');
+      }
     }, 3200);
   };
 
