@@ -51,6 +51,10 @@ app.innerHTML = `
             src="/assets/alive-portrait.jpg"
             alt="ALIVE"
           />
+          <div class="portrait-attention" aria-hidden="true">
+            <span class="attention-glint left"></span>
+            <span class="attention-glint right"></span>
+          </div>
           <div class="character-generated" aria-hidden="true">
             ${characterMarkup()}
           </div>
