@@ -369,10 +369,34 @@ button { color: inherit; }
   height: 190px;
   opacity: .34;
 }
-[data-state="warm"] .identity-portrait { filter: saturate(.9) contrast(.97) brightness(.9); }
-[data-state="thinking"] .identity-portrait { filter: saturate(.7) contrast(.97) brightness(.76); transform: scale(.994); }
-[data-state="curious"] .identity-portrait { filter: saturate(.92) contrast(.96) brightness(.88); }
-[data-state="playful"] .identity-portrait { transform: translateY(-3px) scale(1.008); }
+[data-state="warm"] .identity-portrait {
+  filter: saturate(.9) contrast(.97) brightness(.9);
+  --portrait-breath-duration: 9.2s;
+}
+[data-state="thinking"] .identity-portrait {
+  filter: saturate(.7) contrast(.97) brightness(.76);
+  --portrait-y: -1px;
+  --portrait-scale: .994;
+  --portrait-breath-duration: 10.8s;
+}
+[data-state="curious"] .identity-portrait {
+  filter: saturate(.92) contrast(.96) brightness(.88);
+  --portrait-y: -1px;
+  --portrait-scale: 1.004;
+  --portrait-breath-duration: 7.4s;
+}
+[data-state="listening"] .identity-portrait {
+  --portrait-y: 1px;
+  --portrait-breath-duration: 6.2s;
+}
+[data-state="playful"] .identity-portrait {
+  --portrait-y: -3px;
+  --portrait-scale: 1.008;
+  --portrait-breath-duration: 6.6s;
+}
+[data-state="speaking"] .identity-portrait {
+  --portrait-breath-duration: 5.2s;
+}
 [data-state="thinking"] .window { filter: saturate(.78) brightness(.88); }
 [data-state="curious"] .window-lights { opacity: .9; }
 [data-state="playful"] .lamp-glow { transform: scale(1.08); }
@@ -751,7 +775,7 @@ button { color: inherit; }
   transition: transform .7s cubic-bezier(.2,.7,.2,1), opacity .9s ease;
   pointer-events: none;
   z-index: 4;
-  mix-blend-mode: screen;
+  mix-blend-mode: normal;
 }
 
 .character-shell {
@@ -778,7 +802,10 @@ button { color: inherit; }
   border-radius: 34px;
   box-shadow: 0 32px 90px rgba(0,0,0,.42), 0 0 0 1px rgba(255,255,255,.07);
   filter: saturate(.82) contrast(.96) brightness(.83);
-  animation: portrait-breathe 8.4s ease-in-out infinite;
+  --portrait-y: 0px;
+  --portrait-scale: 1;
+  --portrait-breath-duration: 8.4s;
+  animation: portrait-breathe var(--portrait-breath-duration) ease-in-out infinite;
   transition: filter 1.2s ease, transform 1.2s cubic-bezier(.2,.7,.2,1);
 }
 
@@ -1083,8 +1110,16 @@ button { color: inherit; }
 }
 
 @keyframes portrait-breathe {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.008) translateY(-1px); }
+  0%, 100% {
+    transform:
+      translateY(var(--portrait-y, 0px))
+      scale(var(--portrait-scale, 1));
+  }
+  50% {
+    transform:
+      translateY(calc(var(--portrait-y, 0px) - 1px))
+      scale(calc(var(--portrait-scale, 1) * 1.008));
+  }
 }
 
 @keyframes breathe {
