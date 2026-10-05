@@ -20,6 +20,7 @@ uniform float u_blink;
 uniform float u_breathe;
 uniform float u_speech;
 uniform float u_ready;
+uniform vec2 u_coverScale;
 
 varying vec2 v_uv;
 
@@ -65,7 +66,10 @@ vec2 subtleHeadMotion(vec2 uv, vec2 gaze) {
 }
 
 void main() {
-  vec2 uv = v_uv;
+  vec2 uv = vec2(
+    0.5 + (v_uv.x - 0.5) * u_coverScale.x,
+    0.5 + (v_uv.y - 0.5) * u_coverScale.y
+  );
 
   float breath = 0.5 + 0.5 * sin(u_time * 0.78);
   uv = globalBreath(uv, breath);
@@ -173,11 +177,33 @@ export function createLivingPortrait(canvas, src) {
       gl.uniform1f(gl.getUniformLocation(program, 'u_speech'), speech);
       gl.uniform1f(gl.getUniformLocation(program, 'u_ready'), ready);
 
+      const imageAspect = image.width / Math.max(1, image.height);
+      const viewAspect = canvas.width / Math.max(1, canvas.height);
+      const coverScale = imageAspect > viewAspect
+        ? [viewAspect / imageAspect, 1]
+        : [1, imageAspect / viewAspect];
+
+      gl.uniform2f(
+        gl.getUniformLocation(program, 'u_coverScale'),
+        coverScale[0],
+        coverScale[1]
+      );
+
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     } else if (fallbackContext && image?.complete) {
       resizeCanvas();
       fallbackContext.clearRect(0, 0, canvas.width, canvas.height);
-      fallbackContext.drawImage(image, 0, 0, canvas.width, canvas.height);
+      const imageAspect = image.width / Math.max(1, image.height);
+      const viewAspect = canvas.width / Math.max(1, canvas.height);
+      const drawWidth = imageAspect > viewAspect ? canvas.height * imageAspect : canvas.width;
+      const drawHeight = imageAspect > viewAspect ? canvas.height : canvas.width / imageAspect;
+      fallbackContext.drawImage(
+        image,
+        (canvas.width - drawWidth) * 0.5,
+        (canvas.height - drawHeight) * 0.5,
+        drawWidth,
+        drawHeight
+      );
     }
 
     raf = window.requestAnimationFrame(render);
