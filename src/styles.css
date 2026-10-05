@@ -185,6 +185,23 @@ button { color: inherit; }
   opacity: .23;
 }
 
+.keyboard-present .ambient-b {
+  opacity: .27;
+  transform: translate3d(0, -2px, 0) scale(1.015);
+}
+
+.keyboard-present .lamp-glow {
+  opacity: .96;
+}
+
+.keyboard-present .status-dot {
+  box-shadow: 0 0 22px rgba(241, 207, 180, .58);
+}
+
+.keyboard-present .halo {
+  animation-duration: 5.2s;
+}
+
 .visitor-present .world::before {
   background:
     linear-gradient(180deg, rgba(0,0,0,.06), rgba(0,0,0,.34) 72%, rgba(0,0,0,.7)),
