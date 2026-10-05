@@ -204,8 +204,6 @@ export function createLivingCharacter(canvas) {
       : autonomousY + stateGazeY;
 
     const eyeEase = activeX ? .17 : .105;
-    const headEase = activeX ? .055 : .045;
-
     gazeX += (desiredX - gazeX) * eyeEase;
     gazeY += (desiredY - gazeY) * eyeEase;
     headSettleX += (settleTargetX - headSettleX) * .025;
