@@ -76,11 +76,11 @@ jobs:
               browser.close()
           
           Path("lab/latest/browser-errors.json").write_text(json.dumps(errors, indent=2))
-          if errors:
-              raise SystemExit(f"Browser reported {len(errors)} errors/warnings. See lab/latest/browser-errors.json")
+          print(json.dumps({"browser_errors": len(errors), "snapshots": len(list(out.glob("*.png")))}))
           PY
 
       - name: Commit latest visual snapshots
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -88,3 +88,14 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m "chore: refresh ALIVE self-view snapshots [skip ci]"
           git push
+
+      - name: Fail when browser reports errors or warnings
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          errors = json.loads(Path("lab/latest/browser-errors.json").read_text())
+          if errors:
+              raise SystemExit(f"Browser reported {len(errors)} errors/warnings. See lab/latest/browser-errors.json")
+          PY
