@@ -156,7 +156,7 @@ export function createLivingCharacter(canvas) {
 
     const maxY = Math.min(DESIGN_HEIGHT, 520);
     const startBreathY = 438;
-    const amplitude = 1.35 * breath;
+    const amplitude = (breath - .5) * 4.4;
 
     ctx.save();
     ctx.beginPath();
