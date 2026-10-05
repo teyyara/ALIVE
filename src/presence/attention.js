@@ -1,4 +1,4 @@
-export function attachAttention(stage, { onHold, onRelease } = {}) {
+export function attachAttention(stage, { onAttention, onHold, onRelease } = {}) {
   const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   if (reduceMotion) return () => {};
 
@@ -99,6 +99,7 @@ export function attachAttention(stage, { onHold, onRelease } = {}) {
 
     const gazeX = resting ? currentX + ambientCurrentX : currentX;
     const gazeY = resting ? currentY + ambientCurrentY : currentY;
+    onAttention?.(gazeX, gazeY, resting);
 
     stage.style.setProperty('--gaze-x', `${(gazeX * 6).toFixed(2)}px`);
     stage.style.setProperty('--gaze-y', `${(gazeY * 3.5).toFixed(2)}px`);
