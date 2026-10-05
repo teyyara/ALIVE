@@ -187,19 +187,54 @@ export function createLivingCharacter(canvas) {
     ctx.restore();
   }
 
+  function coverOriginalIris(eye, layout) {
+    const [x, y] = mapDesignToCanvas(eye.x, eye.y, layout);
+
+    ctx.save();
+
+    const radius = 17 * layout.scale;
+    const gradient = ctx.createRadialGradient(
+      x - 2 * layout.scale,
+      y - 2 * layout.scale,
+      1,
+      x,
+      y,
+      radius
+    );
+
+    gradient.addColorStop(0, 'rgba(246, 243, 238, .98)');
+    gradient.addColorStop(.72, 'rgba(236, 231, 224, .96)');
+    gradient.addColorStop(1, 'rgba(218, 209, 199, .10)');
+
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.ellipse(
+      x,
+      y,
+      17 * layout.scale,
+      14 * layout.scale,
+      0,
+      0,
+      Math.PI * 2
+    );
+    ctx.fill();
+
+    ctx.restore();
+  }
+
   function drawIris(image, eye, gaze, layout) {
     if (!image) return;
 
     const baseSize = 44;
-    const irisX = eye.x + gaze.x * 7.2;
-    const irisY = eye.y + gaze.y * 4.5;
+    const irisX = eye.x + gaze.x * 11.5;
+    const irisY = eye.y + gaze.y * 6.4;
 
     const x = layout.offsetX + (irisX - baseSize / 2) * layout.scale;
     const y = layout.offsetY + (irisY - baseSize / 2) * layout.scale;
     const size = baseSize * layout.scale;
 
     ctx.save();
-    ctx.globalAlpha = 1 - blink * .96;
+    ctx.globalAlpha = 1 - blink * .99;
     ctx.drawImage(image, x, y, size, size);
     ctx.restore();
   }
@@ -286,6 +321,9 @@ export function createLivingCharacter(canvas) {
     }
 
     drawPortrait(layout, breath);
+
+    coverOriginalIris(EYES.left, layout);
+    coverOriginalIris(EYES.right, layout);
 
     drawIris(assets.leftIris, EYES.left, {
       x: effectiveX,
