@@ -250,9 +250,13 @@ button { color: inherit; }
 .alive[data-state="curious"] .world-warmth { opacity: 1; }
 .alive[data-state="thinking"] .world-warmth { opacity: .60; }
 .alive[data-state="speaking"] .world-warmth { opacity: .86; }
+.alive[data-state="warm"] #portrait-canvas,
 .alive[data-state="warm"] #character-canvas { filter: brightness(1.015) saturate(1.01); }
+.alive[data-state="thinking"] #portrait-canvas,
 .alive[data-state="thinking"] #character-canvas { filter: brightness(.965) saturate(.94); }
+.alive[data-state="playful"] #portrait-canvas,
 .alive[data-state="playful"] #character-canvas { filter: brightness(1.02) saturate(1.03); }
+.alive[data-state="speaking"] #portrait-canvas,
 .alive[data-state="speaking"] #character-canvas { filter: brightness(1.01); }
 
 .sr-only {
