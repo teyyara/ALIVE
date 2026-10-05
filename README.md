@@ -1,102 +1,34 @@
-# ALIVE — Rebuild Plan
+# ALIVE — Rebuild
 
-ALIVE is being rebuilt from first principles.
+This is the clean rebuild of ALIVE.
 
-## The goal
+The previous prototype is not the foundation anymore. The new project is built around one idea: the woman herself must feel inhabited before any interface or environmental effect is added.
 
-The website must feel like a character inhabiting a place, not a static image with effects around it.
+## Core idea
 
-The character is the hero. The room supports her. The UI stays quiet.
+The photograph is preserved, but it is no longer treated as one indivisible image. The source has been prepared into layered visual regions:
 
-## Architecture
-
-### Character
-A single authored SVG scene composed of real independent layers:
-- shoulders and torso
-- neck
+- base room / background
+- body and shoulders
 - face
-- back hair
-- front hair
-- eyes
-- irises
-- eyelids
-- eyebrows
+- left and right eye surfaces
+- left and right irises
+- left and right brows
 - mouth
 
-These are DOM/SVG elements, so the browser can move the actual facial features.
+A single canvas renderer composes those layers every frame. Pointer attention moves the irises; the eyelids close during a blink; brows and mouth change with expression; the head and shoulders breathe and settle.
 
-### Motion
-A centralized animation controller drives:
-- gaze
-- blink
-- eyelids
-- eyebrows
-- mouth
-- head
-- breathing
-- hair sway
+## Run
 
-Motion uses spring-like interpolation and irregular timing. There is no whole-image parallax.
+```bash
+npm install
+npm run dev
+```
 
-### States
-- idle
-- attentive
-- listening
-- thinking
-- speaking
-- warm
-- curious
-- playful
-
-State changes affect individual character channels.
-
-### World
-The room is deliberately understated:
-- dark architectural background
-- warm practical lamp
-- soft window
-- real depth layers
-- sparse city light
-- subtle atmosphere
-
-No dashboard-like decoration. No constant particles. No large synthetic blobs.
-
-### Interaction
-- pointer position becomes eye/head attention
-- typing becomes attentive
-- sustained attention becomes curious
-- microphone becomes listening
-- browser voice becomes speaking
-- leaving and returning creates continuity
-
-### Conversation
-The visual system is independent from the mind system.
-Phase one works without API credits.
-Phase two can connect server-side to a model without changing the character architecture.
-
-### Accessibility
-Reduced motion, keyboard focus, semantic controls, and readable contrast are mandatory.
-
-### Performance
-Use SVG transforms, opacity, CSS animations, and one requestAnimationFrame loop for attention interpolation. No WebGL unless a later phase proves it improves the actual character.
-
-## Build order
-
-1. Character silhouette and face.
-2. Eye tracking and blinking.
-3. Breathing, head and hair motion.
-4. Expressive state transitions.
-5. Cinematic room.
-6. Interaction and voice.
-7. Conversation mind.
-8. Advanced embodiment only after the first six are visually excellent.
+The current runtime does not require API credits.
 
 ## Quality gate
 
-Do not add an effect because it is technically possible.
+Do not add decorative effects unless the character already feels alive with the environment quiet.
 
-The first test is always:
-
-> Look at ALIVE for five seconds with no interaction. Does the character feel inhabited?
-
-If not, improve the character instead of decorating the room.
+The first test is always a silent five-second observation.

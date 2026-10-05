@@ -1,36 +1,41 @@
-# ALIVE — Design Contract
+# ALIVE Design Direction
 
-ALIVE is a digital presence, not a dashboard.
+## Visual language
 
-## Principles
+Cinematic night interior, deep blacks, warm practical light, photographic texture, restrained typography, and generous negative space around the character.
 
-### Presence before performance
-The character should feel inhabited even when nothing is happening.
+The photograph is not the interface. The interface is an almost invisible layer over the presence.
 
-### Movement must mean something
-Blinking, breathing, posture, gaze, expression, lighting and environmental motion should communicate state or attention. Avoid decorative loops that exist only because animation is available.
+## Character language
 
-### The face is an identity, not a decoration
-Keep a consistent visual character across states and future rendering techniques.
+The woman is the visual hero.
 
-### Silence is allowed
-ALIVE should be able to wait without demanding a click, message, or notification.
+Her face owns the animation hierarchy:
 
-### Never fake a capability
-A local prototype may simulate behavior, but the UI should not imply that a local canned response is the full conversational intelligence.
+1. iris direction
+2. blink
+3. eyebrow movement
+4. mouth movement
+5. head settling
+6. breathing / shoulders
+7. environment
 
-### Human-first atmosphere
-Warmth, curiosity, imperfection and restraint are preferable to a stereotypical futuristic AI aesthetic.
+## Motion philosophy
+
+Every motion needs a reason.
+
+Attention causes gaze.
+
+Conversation causes expression.
+
+Speaking causes mouth rhythm.
+
+Idle time produces rare, irregular micro-movements.
+
+Nothing loops simply to advertise that it is animated.
 
 ## Technical direction
 
-The visual body should be replaceable independently from the conversational mind. The long-term target is a layered 2.5D or 3D character with:
+A 2D canvas composes the photographic layers each frame. The source artwork is separated into a stable background, body, face, eye surfaces, iris layers, brows, and mouth.
 
-- natural idle behavior
-- gaze and attention
-- expressive posture and face
-- synchronized voice
-- state-driven environmental response
-- an extensible conversational backend
-
-The current prototype intentionally uses lightweight browser APIs so the experience can evolve quickly.
+This creates a practical 2.5D character without forcing the project into a full 3D engine before it is necessary.
