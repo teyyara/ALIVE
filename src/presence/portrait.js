@@ -78,10 +78,10 @@ void main() {
   uv = globalBreath(uv, breath);
   uv = subtleHeadMotion(uv, u_gaze);
 
-  vec2 leftEye = vec2(0.468, 0.382);
-  vec2 rightEye = vec2(0.566, 0.382);
+  vec2 leftEye = vec2(0.438, 0.329);
+  vec2 rightEye = vec2(0.512, 0.346);
 
-  vec2 eyeRadius = vec2(0.078, 0.050);
+  vec2 eyeRadius = vec2(0.046, 0.036);
   vec2 eyeShift = vec2(u_gaze.x * 0.022, u_gaze.y * 0.013);
 
   float blinkAmount = smoothstep(0.0, 1.0, u_blink);
@@ -91,10 +91,23 @@ void main() {
 
   vec2 mouthCenter = vec2(0.50, 0.555);
   vec2 mouthQ = (uv - mouthCenter) / vec2(0.095, 0.048);
-  float mouthWeight = exp(-dot(mouthQ, mouthQ) * 2.8);
-  uv.y += u_speech * 0.0035 * mouthWeight * sin(u_time * 14.0);
+  float mouthWeight = exp(-dot(mouthQ, mouthQ) * 3.0);
+  uv.y += u_speech * 0.006 * mouthWeight * sin(u_time * 14.0);
 
   vec4 color = texture2D(u_texture, uv);
+
+  float leftLidWeight = exp(
+    -dot((uv - leftEye) / vec2(0.050, 0.040), (uv - leftEye) / vec2(0.050, 0.040)) * 2.0
+  );
+  float rightLidWeight = exp(
+    -dot((uv - rightEye) / vec2(0.050, 0.040), (uv - rightEye) / vec2(0.050, 0.040)) * 2.0
+  );
+  float lidWeight = max(leftLidWeight, rightLidWeight);
+  color.rgb = mix(
+    color.rgb,
+    color.rgb * vec3(0.72, 0.67, 0.64),
+    blinkAmount * lidWeight * 0.34
+  );
 
   float vignette = smoothstep(0.95, 0.18, length(v_uv - 0.5));
   color.rgb *= mix(0.90, 1.0, vignette);
