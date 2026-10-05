@@ -17,7 +17,6 @@ uniform sampler2D u_texture;
 uniform float u_time;
 uniform vec2 u_gaze;
 uniform float u_blink;
-uniform float u_breathe;
 uniform float u_speech;
 uniform float u_ready;
 uniform vec2 u_coverScale;
@@ -44,7 +43,7 @@ vec2 eyeWarp(vec2 uv, vec2 center, vec2 radius, vec2 shift, float blink) {
 }
 
 vec2 globalBreath(vec2 uv, float breath) {
-  float torsoWeight = smoothstep(0.74, 0.22, uv.y);
+  float torsoWeight = 1.0 - smoothstep(0.22, 0.74, uv.y);
   float centerY = 0.55;
 
   uv.x += sin(u_time * 0.78) * 0.0014 * torsoWeight;
@@ -79,7 +78,7 @@ void main() {
   vec2 rightEye = vec2(0.625, 0.34);
 
   vec2 eyeRadius = vec2(0.105, 0.065);
-  vec2 eyeShift = vec2(u_gaze.x * 0.010, u_gaze.y * 0.006);
+  vec2 eyeShift = vec2(u_gaze.x * 0.014, u_gaze.y * 0.008);
 
   float blinkAmount = smoothstep(0.0, 1.0, u_blink);
 
@@ -173,7 +172,6 @@ export function createLivingPortrait(canvas, src) {
       gl.uniform1f(gl.getUniformLocation(program, 'u_time'), time);
       gl.uniform2f(gl.getUniformLocation(program, 'u_gaze'), gazeX, gazeY);
       gl.uniform1f(gl.getUniformLocation(program, 'u_blink'), blinkCurrent);
-      gl.uniform1f(gl.getUniformLocation(program, 'u_breathe'), 0.5 + 0.5 * Math.sin(time * 0.78));
       gl.uniform1f(gl.getUniformLocation(program, 'u_speech'), speech);
       gl.uniform1f(gl.getUniformLocation(program, 'u_ready'), ready);
 
