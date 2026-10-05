@@ -9,7 +9,25 @@ export function attachAttention(stage, { onHold, onRelease } = {}) {
   let raf = 0;
   let resting = true;
   let dwellTimer;
+  let ambientTimer;
   let held = false;
+  let ambientX = 0;
+  let ambientY = 0;
+
+  const scheduleAmbientGaze = () => {
+    window.clearTimeout(ambientTimer);
+
+    ambientTimer = window.setTimeout(() => {
+      if (!resting || held || document.hidden) {
+        scheduleAmbientGaze();
+        return;
+      }
+
+      ambientX = (Math.random() * 2 - 1) * 0.18;
+      ambientY = (Math.random() * 2 - 1) * 0.11;
+      scheduleAmbientGaze();
+    }, 4200 + Math.random() * 5200);
+  };
 
   const update = (event) => {
     const rect = stage.getBoundingClientRect();
@@ -22,6 +40,9 @@ export function attachAttention(stage, { onHold, onRelease } = {}) {
     targetX = Math.max(-1, Math.min(1, (event.clientX - centerX) / rangeX));
     targetY = Math.max(-1, Math.min(1, (event.clientY - centerY) / rangeY));
     resting = false;
+    ambientX = 0;
+    ambientY = 0;
+    window.clearTimeout(ambientTimer);
 
     window.clearTimeout(dwellTimer);
     if (held) {
@@ -49,6 +70,9 @@ export function attachAttention(stage, { onHold, onRelease } = {}) {
     targetX = 0;
     targetY = 0;
     resting = true;
+    ambientX = 0;
+    ambientY = 0;
+    scheduleAmbientGaze();
     window.clearTimeout(dwellTimer);
     if (held) {
       held = false;
@@ -68,12 +92,15 @@ export function attachAttention(stage, { onHold, onRelease } = {}) {
     stage.style.setProperty('--attention-rotate', `${(currentX * 1.8).toFixed(2)}deg`);
     stage.style.setProperty('--attention-tilt', `${(currentY * -1.1).toFixed(2)}deg`);
 
-    stage.style.setProperty('--gaze-x', `${(currentX * 6).toFixed(2)}px`);
-    stage.style.setProperty('--gaze-y', `${(currentY * 3.5).toFixed(2)}px`);
-    stage.style.setProperty('--glint-x', `${(currentX * 9).toFixed(2)}px`);
-    stage.style.setProperty('--glint-y', `${(currentY * 5).toFixed(2)}px`);
-    stage.style.setProperty('--brow-x', `${(currentX * 2.2).toFixed(2)}px`);
-    stage.style.setProperty('--brow-y', `${(currentY * 1.4).toFixed(2)}px`);
+    const gazeX = resting ? currentX + ambientX : currentX;
+    const gazeY = resting ? currentY + ambientY : currentY;
+
+    stage.style.setProperty('--gaze-x', `${(gazeX * 6).toFixed(2)}px`);
+    stage.style.setProperty('--gaze-y', `${(gazeY * 3.5).toFixed(2)}px`);
+    stage.style.setProperty('--glint-x', `${(gazeX * 9).toFixed(2)}px`);
+    stage.style.setProperty('--glint-y', `${(gazeY * 5).toFixed(2)}px`);
+    stage.style.setProperty('--brow-x', `${(gazeX * 2.2).toFixed(2)}px`);
+    stage.style.setProperty('--brow-y', `${(gazeY * 1.4).toFixed(2)}px`);
     stage.style.setProperty('--attention-rest', resting ? '1' : '0');
 
     raf = requestAnimationFrame(animate);
@@ -84,12 +111,14 @@ export function attachAttention(stage, { onHold, onRelease } = {}) {
   window.addEventListener('blur', reset, { passive: true });
 
   raf = requestAnimationFrame(animate);
+  scheduleAmbientGaze();
 
   return () => {
     window.removeEventListener('pointermove', update);
     window.removeEventListener('pointerleave', reset);
     window.removeEventListener('blur', reset);
     window.clearTimeout(dwellTimer);
+    window.clearTimeout(ambientTimer);
     cancelAnimationFrame(raf);
   };
 }
