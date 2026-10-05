@@ -1,56 +1,102 @@
-# ALIVE
+# ALIVE — Rebuild Plan
 
-ALIVE is an experiment in giving an artificial intelligence a visual place to meet a human.
+ALIVE is being rebuilt from first principles.
 
-The repository is intentionally small at first. The goal is not a conventional chatbot UI. The goal is a **presence**: a recognizable visual identity with natural idle behavior, attention, expression, voice, and eventually a more embodied character and environment.
+## The goal
 
-## Current foundation
-- cinematic digital room
-- feminine visual identity
-- natural idle motion
-- state model: idle, listening, curious, thinking, warm, playful, speaking
-- pointer-aware parallax and sustained-attention response
-- restrained portrait depth planes
-- time-of-day room atmospheres and moon cycle
-- rare passing city-light environmental events
-- state-reactive portrait lighting
-- GPU-driven live portrait surface with source-aware facial landmarks
-- adaptive local microphone noise floor
-- speech-boundary room response
-- rare organic double-blink behavior
-- typing-aware room response
-- optional browser voice output and direct microphone recording
-- modular source layout ready for a layered 2.5D/3D body
+The website must feel like a character inhabiting a place, not a static image with effects around it.
 
-## Development
-```bash
-npm install
-npm run dev
-```
+The character is the hero. The room supports her. The UI stays quiet.
 
-## Philosophy
-> Nothing should move merely because it can. Every movement should communicate something.
+## Architecture
 
-ALIVE should feel inhabited, not animated.
+### Character
+A single authored SVG scene composed of real independent layers:
+- shoulders and torso
+- neck
+- face
+- back hair
+- front hair
+- eyes
+- irises
+- eyelids
+- eyebrows
+- mouth
 
+These are DOM/SVG elements, so the browser can move the actual facial features.
 
-## Conversation mind
+### Motion
+A centralized animation controller drives:
+- gaze
+- blink
+- eyelids
+- eyebrows
+- mouth
+- head
+- breathing
+- hair sway
 
-ALIVE can use the OpenAI Responses API through the server-side `/api/chat` boundary. The browser never receives the API key.
+Motion uses spring-like interpolation and irregular timing. There is no whole-image parallax.
 
-For local development:
+### States
+- idle
+- attentive
+- listening
+- thinking
+- speaking
+- warm
+- curious
+- playful
 
-1. Copy `.env.example` to `.env.local`.
-2. Put your API key in `OPENAI_API_KEY`.
-3. Keep `ALIVE_MODEL=gpt-6-luna` unless you choose another model available to your API project.
-4. Restart `npm run dev`.
+State changes affect individual character channels.
 
-The server-side route uses `store: false` and receives only the recent conversation history from the current ALIVE session.
+### World
+The room is deliberately understated:
+- dark architectural background
+- warm practical lamp
+- soft window
+- real depth layers
+- sparse city light
+- subtle atmosphere
 
-## Current experience
+No dashboard-like decoration. No constant particles. No large synthetic blobs.
 
-The first presence layer is now intentionally useful even without API credits. The browser handles pointer attention, subtle idle gaze drift, sustained attention, typing engagement, visitor presence, local microphone recording and level sensing, voice output, ambient response, and small local conversational fallbacks. Paid services are isolated behind server-side endpoints.
+### Interaction
+- pointer position becomes eye/head attention
+- typing becomes attentive
+- sustained attention becomes curious
+- microphone becomes listening
+- browser voice becomes speaking
+- leaving and returning creates continuity
 
-When API credits are unavailable, ALIVE stops retrying the paid mind/transcription path for the current session and remains responsive locally rather than becoming a broken shell.
+### Conversation
+The visual system is independent from the mind system.
+Phase one works without API credits.
+Phase two can connect server-side to a model without changing the character architecture.
 
-The chosen identity is rendered through `src/presence/portrait.js` so gaze, blinking, breathing, expression, and speech can deform the actual image pixels. ALIVE now prefers `public/assets/alive-portrait-clean.jpg` (a clean crop of the high-resolution source without the original mockup UI) and falls back to `public/assets/alive-portrait.jpg` when it is not present. Replacing the compressed asset is therefore a one-file addition, not an architectural change.
+### Accessibility
+Reduced motion, keyboard focus, semantic controls, and readable contrast are mandatory.
+
+### Performance
+Use SVG transforms, opacity, CSS animations, and one requestAnimationFrame loop for attention interpolation. No WebGL unless a later phase proves it improves the actual character.
+
+## Build order
+
+1. Character silhouette and face.
+2. Eye tracking and blinking.
+3. Breathing, head and hair motion.
+4. Expressive state transitions.
+5. Cinematic room.
+6. Interaction and voice.
+7. Conversation mind.
+8. Advanced embodiment only after the first six are visually excellent.
+
+## Quality gate
+
+Do not add an effect because it is technically possible.
+
+The first test is always:
+
+> Look at ALIVE for five seconds with no interaction. Does the character feel inhabited?
+
+If not, improve the character instead of decorating the room.
