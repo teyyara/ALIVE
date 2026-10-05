@@ -25,6 +25,7 @@ app.innerHTML = `
       <div class="window-horizon"></div>
       <div class="window-lights"></div>
       <div class="window-moon" aria-hidden="true"></div>
+      <div class="window-pass" aria-hidden="true"></div>
       <div class="window-frame frame-v"></div>
       <div class="window-frame frame-h"></div>
     </div>
