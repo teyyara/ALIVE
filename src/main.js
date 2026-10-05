@@ -19,6 +19,7 @@ app.innerHTML = `
         <img class="portrait-base" src="/assets/alive-clean-portrait.webp" alt="ALIVE" />
         <img class="portrait-breath" src="/assets/alive-clean-portrait.webp" alt="" aria-hidden="true" />
         <img class="portrait-head" src="/assets/alive-clean-portrait.webp" alt="" aria-hidden="true" />
+        <img class="portrait-mouth" src="/assets/alive-clean-portrait.webp" alt="" aria-hidden="true" />
         <canvas id="character-canvas" aria-label="ALIVE, a digital presence"></canvas>
       </div>
       <div class="presence-copy">
