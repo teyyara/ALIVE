@@ -59,6 +59,8 @@ export function attachAttention(stage) {
 
     stage.style.setProperty('--gaze-x', `${(currentX * 6).toFixed(2)}px`);
     stage.style.setProperty('--gaze-y', `${(currentY * 3.5).toFixed(2)}px`);
+    stage.style.setProperty('--glint-x', `${(currentX * 9).toFixed(2)}px`);
+    stage.style.setProperty('--glint-y', `${(currentY * 5).toFixed(2)}px`);
     stage.style.setProperty('--brow-x', `${(currentX * 2.2).toFixed(2)}px`);
     stage.style.setProperty('--brow-y', `${(currentY * 1.4).toFixed(2)}px`);
     stage.style.setProperty('--attention-rest', resting ? '1' : '0');
