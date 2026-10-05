@@ -156,6 +156,8 @@ function addBubble(role, text) {
 
   requestAnimationFrame(() => el.classList.add('visible'));
   conversation.scrollTop = conversation.scrollHeight;
+
+  return el;
 }
 
 const conversationHistory = [];
@@ -228,21 +230,39 @@ composer.addEventListener('submit', (event) => {
     setState('thinking');
 
     let reply;
+    let streamedBubble = null;
 
     try {
       reply = mindUnavailable
         ? fallbackReply(input)
-        : await requestPresenceReply(conversationHistory);
+        : await requestPresenceReply(conversationHistory, {
+          onDelta: (delta) => {
+            if (!streamedBubble) {
+              streamedBubble = addBubble('alive', '');
+            }
+
+            streamedBubble.textContent += delta;
+            conversation.scrollTop = conversation.scrollHeight;
+            setState('speaking');
+          }
+        });
     } catch (error) {
       if (/no credits|insufficient|billing|credit/i.test(error?.message || '')) {
         mindUnavailable = true;
       }
 
       reply = fallbackReply(input);
+
+      if (streamedBubble) {
+        streamedBubble.textContent = reply;
+      }
+    }
+
+    if (!streamedBubble) {
+      addBubble('alive', reply);
     }
 
     conversationHistory.push({ role: 'assistant', content: reply });
-    addBubble('alive', reply);
     setState('warm');
     voice.speak(reply);
   }, 280);
