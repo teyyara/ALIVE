@@ -415,17 +415,17 @@ button { color: inherit; }
   opacity: .34;
 }
 [data-state="warm"] .identity-portrait {
-  filter: saturate(.9) contrast(.97) brightness(.9);
+  filter: saturate(.96) contrast(.98) brightness(.98);
   --portrait-breath-duration: 9.2s;
 }
 [data-state="thinking"] .identity-portrait {
-  filter: saturate(.7) contrast(.97) brightness(.76);
+  filter: saturate(.80) contrast(.98) brightness(.84);
   --portrait-y: -1px;
   --portrait-scale: .994;
   --portrait-breath-duration: 10.8s;
 }
 [data-state="curious"] .identity-portrait {
-  filter: saturate(.92) contrast(.96) brightness(.88);
+  filter: saturate(.98) contrast(.98) brightness(.96);
   --portrait-y: -1px;
   --portrait-scale: 1.004;
   --portrait-breath-duration: 7.4s;
@@ -435,6 +435,7 @@ button { color: inherit; }
   --portrait-breath-duration: 6.2s;
 }
 [data-state="playful"] .identity-portrait {
+  filter: saturate(1.0) contrast(.98) brightness(1.0);
   --portrait-y: -3px;
   --portrait-scale: 1.008;
   --portrait-breath-duration: 6.6s;
@@ -556,12 +557,12 @@ button { color: inherit; }
 .presence {
   position: relative;
   z-index: 10;
-  width: min(1040px, calc(100% - 36px));
+  width: min(1180px, calc(100% - 36px));
   margin: auto;
   display: grid;
   place-items: center;
   align-content: center;
-  min-height: 58vh;
+  min-height: 64vh;
 }
 
 .stage {
@@ -844,7 +845,7 @@ button { color: inherit; }
   object-position: 50% 43%;
   border-radius: 34px;
   box-shadow: 0 32px 90px rgba(0,0,0,.42), 0 0 0 1px rgba(255,255,255,.07);
-  filter: saturate(.82) contrast(.96) brightness(.83);
+  filter: saturate(.92) contrast(.98) brightness(.95);
   --portrait-y: 0px;
   --portrait-scale: 1;
   --portrait-breath-duration: 8.4s;
@@ -974,7 +975,7 @@ button { color: inherit; }
 }
 
 .copy {
-  margin-top: -22px;
+  margin-top: 12px;
   text-align: center;
   max-width: 680px;
   position: relative;
@@ -1434,7 +1435,8 @@ button { color: inherit; }
 }
 
 .stage {
-  width: min(660px, 84vw);
+  width: min(900px, 88vw);
+  aspect-ratio: 1.21 / 1;
 }
 
 .portrait-attention {
