@@ -1333,3 +1333,119 @@ button { color: inherit; }
     animation: none !important;
   }
 }
+
+
+/* --- Art direction: quiet cinematic world --- */
+.scene::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background:
+    radial-gradient(circle at 50% 36%, transparent 0 18%, rgba(8,7,6,.10) 54%, rgba(8,7,6,.68) 100%),
+    linear-gradient(180deg, rgba(4,4,4,.10), rgba(4,4,4,.26) 66%, rgba(4,4,4,.62));
+}
+
+.world::before {
+  background:
+    radial-gradient(circle at 72% 30%, rgba(231,190,159,.11), transparent 25%),
+    radial-gradient(circle at 18% 67%, rgba(131,141,137,.055), transparent 30%),
+    linear-gradient(180deg, rgba(0,0,0,.03), rgba(0,0,0,.42) 76%, rgba(0,0,0,.72));
+}
+
+.window {
+  width: min(48vw, 760px);
+  height: min(82vh, 860px);
+  right: -12vw;
+  top: 8vh;
+  border: 0;
+  border-radius: 42% 0 0 42%;
+  background: transparent;
+  box-shadow: none;
+  opacity: .42;
+  transform: perspective(1400px) rotateY(-4deg);
+  filter: saturate(.78);
+  overflow: hidden;
+}
+
+.window::after {
+  inset: -8%;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse at 52% 32%, rgba(255,229,207,.07), transparent 33%),
+    linear-gradient(108deg, rgba(255,255,255,.045), transparent 42%, rgba(0,0,0,.13));
+}
+
+.window-sky {
+  inset: 0;
+  border-radius: inherit;
+}
+
+.window-haze {
+  left: -8%;
+  right: -8%;
+  bottom: 8%;
+  height: 44%;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(224,201,189,.10), transparent 68%);
+  filter: blur(26px);
+  opacity: .75;
+}
+
+.window-horizon,
+.window-frame {
+  display: none;
+}
+
+.window-lights {
+  left: 9%;
+  right: 5%;
+  bottom: 7%;
+  height: 38%;
+  opacity: .34;
+  filter: blur(.55px);
+  mask-image: radial-gradient(ellipse at 50% 50%, #000 0 44%, transparent 78%);
+  background-size: 54px 42px, 76px 56px;
+}
+
+.window-moon {
+  right: 19%;
+  top: 14%;
+}
+
+.ambient-a {
+  left: -8vw;
+  top: 30vh;
+  background: radial-gradient(circle, rgba(178,143,122,.13), transparent 70%);
+}
+
+.ambient-b {
+  right: -8vw;
+  bottom: 14vh;
+  background: radial-gradient(circle, rgba(132,147,141,.08), transparent 70%);
+}
+
+.stage {
+  width: min(660px, 84vw);
+}
+
+.portrait-attention {
+  opacity: .42;
+}
+
+.attention-held .portrait-attention {
+  opacity: .68;
+}
+
+.shimmer {
+  opacity: .32;
+}
+
+.halo {
+  inset: 5%;
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(222,193,171,.17), transparent 48%),
+    radial-gradient(ellipse at 50% 70%, rgba(222,193,171,.08), transparent 64%);
+  filter: blur(34px);
+}
