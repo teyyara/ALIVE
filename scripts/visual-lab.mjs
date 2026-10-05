@@ -32,6 +32,7 @@ try {
 
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+  page.setDefaultTimeout(8000);
 
   const consoleErrors = [];
   const pageErrors = [];
@@ -42,18 +43,18 @@ try {
   const specialStates = ['blink'];
 
   for (const state of states) {
-    await page.goto(`http://127.0.0.1:4173/?lab=${state}`, { waitUntil: 'networkidle' });
+    await page.goto(`http://127.0.0.1:4173/?lab=${state}`, { waitUntil: 'domcontentloaded', timeout: 10000 });
     await page.waitForTimeout(350);
     await page.screenshot({ path: `${output}/${state}.png`, fullPage: true });
   }
 
   for (const state of specialStates) {
-    await page.goto(`http://127.0.0.1:4173/?lab=${state}`, { waitUntil: 'networkidle' });
+    await page.goto(`http://127.0.0.1:4173/?lab=${state}`, { waitUntil: 'domcontentloaded', timeout: 10000 });
     await page.waitForTimeout(330);
     await page.screenshot({ path: `${output}/${state}.png`, fullPage: true });
   }
 
-  await page.goto('http://127.0.0.1:4173/?inspect=1', { waitUntil: 'networkidle' });
+  await page.goto('http://127.0.0.1:4173/?inspect=1', { waitUntil: 'domcontentloaded', timeout: 10000 });
   await page.mouse.move(720, 420);
   await page.waitForTimeout(250);
   await page.screenshot({ path: `${output}/interaction-center.png`, fullPage: true });
@@ -62,7 +63,7 @@ try {
   await page.waitForTimeout(350);
   await page.screenshot({ path: `${output}/interaction-right.png`, fullPage: true });
 
-  await page.goto('http://127.0.0.1:4173/?inspect=1', { waitUntil: 'networkidle' });
+  await page.goto('http://127.0.0.1:4173/?inspect=1', { waitUntil: 'domcontentloaded', timeout: 10000 });
   await page.locator('#message').fill('Hello ALIVE');
   await page.locator('#composer button').click();
   await page.waitForTimeout(1100);
