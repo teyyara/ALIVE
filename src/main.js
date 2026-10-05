@@ -178,6 +178,8 @@ function handlePointerMove(event) {
   character.setAttention(Math.max(-1, Math.min(1, x)), Math.max(-1, Math.min(1, y)));
   root.style.setProperty('--visitor-x', `${event.clientX}px`);
   root.style.setProperty('--visitor-y', `${event.clientY}px`);
+  root.style.setProperty('--attention-x', `${x * 1.6}px`);
+  root.style.setProperty('--attention-y', `${y * 1.0}px`);
 
   if (Math.abs(x) > .13 || Math.abs(y) > .13) {
     window.clearTimeout(returnTimer);
@@ -188,6 +190,8 @@ function handlePointerMove(event) {
 stage.addEventListener('pointermove', handlePointerMove, { passive: true });
 stage.addEventListener('pointerleave', () => {
   character.setAttention(0, 0);
+  root.style.setProperty('--attention-x', '0px');
+  root.style.setProperty('--attention-y', '0px');
   window.clearTimeout(returnTimer);
   returnTimer = window.setTimeout(() => {
     if (state === 'attentive' || state === 'curious') setState('idle');
