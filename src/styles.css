@@ -143,6 +143,60 @@ button { color: inherit; }
   --world-warmth: .08;
 }
 
+[data-time="morning"] .window-sky {
+  background:
+    radial-gradient(circle at 68% 22%, rgba(255,214,172,.78), transparent 9%),
+    linear-gradient(180deg, #394052 0%, #81706f 43%, #4a4144 70%, #171618 100%);
+}
+
+[data-time="afternoon"] .window-sky {
+  background:
+    radial-gradient(circle at 64% 24%, rgba(247,212,175,.56), transparent 8%),
+    linear-gradient(180deg, #323744 0%, #695e64 46%, #3a343b 70%, #121214 100%);
+}
+
+[data-time="evening"] .window-sky {
+  background:
+    radial-gradient(circle at 70% 26%, rgba(240,174,126,.88), transparent 9%),
+    linear-gradient(180deg, #201f2b 0%, #6f5960 38%, #3c3038 66%, #111113 100%);
+}
+
+[data-time="night"] .window-sky {
+  background:
+    radial-gradient(circle at 72% 20%, rgba(215,196,186,.20), transparent 5%),
+    radial-gradient(circle at 26% 28%, rgba(160,176,198,.12), transparent 7%),
+    linear-gradient(180deg, #151a27 0%, #2c2b3c 44%, #201d28 70%, #0b0b0d 100%);
+}
+
+[data-time="night"] .window-lights {
+  opacity: .92;
+  animation-duration: 8.5s;
+}
+
+[data-time="night"] .window-haze {
+  opacity: .72;
+}
+
+[data-time="morning"] .window-haze {
+  opacity: .52;
+}
+
+[data-time="afternoon"] .window-haze {
+  opacity: .34;
+}
+
+[data-time="evening"] .window-haze {
+  opacity: .66;
+}
+
+[data-time="night"] .lamp-glow {
+  opacity: .9;
+}
+
+[data-time="morning"] .lamp-glow {
+  opacity: .68;
+}
+
 .visitor-present .ambient-a,
 .visitor-moving .ambient-a {
   opacity: calc(.18 + var(--visitor-speed, 0) * .11);
