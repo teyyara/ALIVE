@@ -495,6 +495,7 @@ function tick() {
 }
 
 const destroyAttention = attachAttention(stage, {
+  onAttention: (x, y) => livingPortrait.setAttention(x, y),
   onHold: () => {
     if (getState() === 'idle' || getState() === 'warm') setState('curious');
   },
