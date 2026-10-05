@@ -54,6 +54,7 @@ app.innerHTML = `
           <div class="portrait-attention" aria-hidden="true">
             <span class="attention-glint left"></span>
             <span class="attention-glint right"></span>
+            <span class="portrait-blink"></span>
           </div>
           <div class="character-generated" aria-hidden="true">
             ${characterMarkup()}
