@@ -14,6 +14,7 @@ The repository is intentionally small at first. The goal is not a conventional c
 - time-of-day room atmospheres and moon cycle
 - rare passing city-light environmental events
 - state-reactive portrait lighting
+- GPU-driven live portrait surface
 - adaptive local microphone noise floor
 - speech-boundary room response
 - rare organic double-blink behavior
@@ -52,4 +53,4 @@ The first presence layer is now intentionally useful even without API credits. T
 
 When API credits are unavailable, ALIVE stops retrying the paid mind/transcription path for the current session and remains responsive locally rather than becoming a broken shell.
 
-The portrait asset in `public/assets/alive-portrait.jpg` is currently a temporary compressed delivery of the chosen identity. The high-quality source should replace it later without changing the identity itself.
+The chosen identity still comes from `public/assets/alive-portrait.jpg`, but the browser now renders that source through `src/presence/portrait.js` so gaze, blinking, breathing, and speech can deform the actual image pixels. The high-quality source should replace the compressed asset later without changing the animation architecture.
