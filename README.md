@@ -11,6 +11,7 @@ The repository is intentionally small at first. The goal is not a conventional c
 - state model: idle, listening, curious, thinking, warm, playful, speaking
 - pointer-aware parallax and sustained-attention response
 - restrained portrait depth planes
+- time-of-day room atmospheres and moon cycle
 - typing-aware room response
 - optional browser voice output and direct microphone recording
 - modular source layout ready for a layered 2.5D/3D body
