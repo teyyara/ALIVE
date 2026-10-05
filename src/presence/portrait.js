@@ -18,6 +18,9 @@ uniform float u_time;
 uniform vec2 u_gaze;
 uniform vec4 u_expression;
 uniform float u_blink;
+uniform vec2 u_leftEye;
+uniform vec2 u_rightEye;
+uniform vec2 u_mouth;
 uniform float u_speech;
 uniform float u_ready;
 uniform vec4 u_crop;
@@ -79,8 +82,8 @@ void main() {
   uv = globalBreath(uv, breath);
   uv = subtleHeadMotion(uv, u_gaze);
 
-  vec2 leftEye = vec2(0.438, 0.329);
-  vec2 rightEye = vec2(0.512, 0.346);
+  vec2 leftEye = u_leftEye;
+  vec2 rightEye = u_rightEye;
 
   vec2 eyeRadius = vec2(0.046, 0.036);
   vec2 eyeShift = vec2(u_gaze.x * 0.028, u_gaze.y * 0.017);
@@ -90,7 +93,12 @@ void main() {
   uv = eyeWarp(uv, leftEye, eyeRadius, eyeShift, blinkAmount);
   uv = eyeWarp(uv, rightEye, eyeRadius, eyeShift, blinkAmount);
 
-  vec2 mouthCenter = vec2(0.50, 0.555);
+  vec2 irisRadius = vec2(0.026, 0.020);
+  vec2 irisShift = vec2(u_gaze.x * 0.042, u_gaze.y * 0.024);
+  uv = eyeWarp(uv, leftEye, irisRadius, irisShift, 0.0);
+  uv = eyeWarp(uv, rightEye, irisRadius, irisShift, 0.0);
+
+  vec2 mouthCenter = u_mouth;
   vec2 mouthQ = (uv - mouthCenter) / vec2(0.095, 0.048);
   float mouthWeight = exp(-dot(mouthQ, mouthQ) * 3.0);
   uv.y += u_speech * 0.006 * mouthWeight * sin(u_time * 14.0);
@@ -168,6 +176,11 @@ export function createLivingPortrait(canvas, src, { fallbackSrc } = {}) {
   let expressionThought = 0;
   let expressionSmileTarget = 0.18;
   let expressionThoughtTarget = 0;
+  let landmarks = {
+    leftEye: [0.438, 0.329],
+    rightEye: [0.512, 0.346],
+    mouth: [0.462, 0.466]
+  };
   let speech = 0;
   let ready = 0;
   let gl = null;
@@ -197,6 +210,9 @@ export function createLivingPortrait(canvas, src, { fallbackSrc } = {}) {
       gl.uniform2f(uniforms.gaze, gazeX, gazeY);
       gl.uniform4f(uniforms.expression, expressionSmile, expressionThought, 0, 0);
       gl.uniform1f(uniforms.blink, blinkCurrent);
+      gl.uniform2f(uniforms.leftEye, landmarks.leftEye[0], landmarks.leftEye[1]);
+      gl.uniform2f(uniforms.rightEye, landmarks.rightEye[0], landmarks.rightEye[1]);
+      gl.uniform2f(uniforms.mouth, landmarks.mouth[0], landmarks.mouth[1]);
       gl.uniform1f(uniforms.speech, speech);
       gl.uniform1f(uniforms.ready, ready);
 
@@ -316,11 +332,22 @@ export function createLivingPortrait(canvas, src, { fallbackSrc } = {}) {
           gaze: gl.getUniformLocation(program, 'u_gaze'),
           expression: gl.getUniformLocation(program, 'u_expression'),
           blink: gl.getUniformLocation(program, 'u_blink'),
+          leftEye: gl.getUniformLocation(program, 'u_leftEye'),
+          rightEye: gl.getUniformLocation(program, 'u_rightEye'),
+          mouth: gl.getUniformLocation(program, 'u_mouth'), gl.getUniformLocation(program, 'u_blink'),
           speech: gl.getUniformLocation(program, 'u_speech'),
           ready: gl.getUniformLocation(program, 'u_ready'),
           crop: gl.getUniformLocation(program, 'u_crop'),
           viewAspect: gl.getUniformLocation(program, 'u_viewAspect')
         };
+
+        if (!usingFallbackSource) {
+          landmarks = {
+            leftEye: [0.433, 0.379],
+            rightEye: [0.544, 0.400],
+            mouth: [0.470, 0.545]
+          };
+        }
 
         ready = 1;
         canvas.classList.add('portrait-ready');
