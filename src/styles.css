@@ -37,9 +37,11 @@ button { color: inherit; }
 }
 
 .world-warmth {
-  background: radial-gradient(circle at 36% 43%, rgba(238,190,153,.14), transparent 28%);
+  background:
+    radial-gradient(circle at 34% 42%, rgba(238,190,153,.12), transparent 28%),
+    radial-gradient(circle at 73% 35%, rgba(140,155,173,.055), transparent 26%);
   mix-blend-mode: screen;
-  opacity: .75;
+  opacity: .64;
   pointer-events: none;
 }
 
@@ -69,18 +71,30 @@ button { color: inherit; }
 .presence {
   position: relative;
   z-index: 5;
-  min-height: calc(100vh - 164px);
+  min-height: calc(100vh - 112px);
   display: grid;
   place-items: center;
   align-content: center;
-  padding: 6px 24px 152px;
+  padding: 0 24px 158px;
 }
 
 .character-stage {
   position: relative;
-  width: min(1120px, 94vw);
+  width: min(1020px, 94vw, calc((100vh - 190px) * 1.2114));
   aspect-ratio: 1020 / 842;
-  filter: drop-shadow(0 46px 92px rgba(0,0,0,.42));
+  filter: drop-shadow(0 40px 78px rgba(0,0,0,.40));
+  -webkit-mask-image: radial-gradient(
+    ellipse at 50% 46%,
+    #000 54%,
+    rgba(0,0,0,.94) 72%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse at 50% 46%,
+    #000 54%,
+    rgba(0,0,0,.94) 72%,
+    transparent 100%
+  );
 }
 
 #character-canvas {
@@ -94,10 +108,11 @@ button { color: inherit; }
 .presence-copy {
   position: absolute;
   left: 50%;
-  bottom: 105px;
+  bottom: 108px;
   transform: translateX(-50%);
   text-align: center;
   pointer-events: none;
+  z-index: 3;
 }
 
 .eyebrow {
@@ -205,7 +220,10 @@ button { color: inherit; }
 .alive[data-state="curious"] .world-warmth { opacity: 1; }
 .alive[data-state="thinking"] .world-warmth { opacity: .60; }
 .alive[data-state="speaking"] .world-warmth { opacity: .86; }
-.alive[data-state="playful"] .world-image { transform: scale(1.018); }
+.alive[data-state="warm"] #character-canvas { filter: brightness(1.015) saturate(1.01); }
+.alive[data-state="thinking"] #character-canvas { filter: brightness(.965) saturate(.94); }
+.alive[data-state="playful"] #character-canvas { filter: brightness(1.02) saturate(1.03); }
+.alive[data-state="speaking"] #character-canvas { filter: brightness(1.01); }
 
 .sr-only {
   position: absolute;
@@ -235,5 +253,5 @@ button { color: inherit; }
     scroll-behavior: auto !important;
     transition-duration: .001ms !important;
   }
-  .world-image { transform: none; }
+  #character-canvas { filter: none !important; }
 }
