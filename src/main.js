@@ -1,4 +1,3 @@
-import './styles.css';
 import { createLivingCharacter } from './character.js';
 
 const app = document.querySelector('#app');
@@ -73,6 +72,12 @@ let blinkTimer = 0;
 let idleTimer = 0;
 let returnTimer = 0;
 let voiceTimer = 0;
+let timeTimer = 0;
+
+const labParams = new URLSearchParams(window.location.search);
+const labState = labParams.get('lab');
+const labGaze = labParams.get('gaze');
+const labMode = Boolean(labState);
 
 function setState(next) {
   if (!STATES[next] || destroyed) return;
@@ -227,7 +232,7 @@ function updateTime() {
 }
 
 updateTime();
-window.setInterval(updateTime, 60000);
+timeTimer = window.setInterval(updateTime, 60000);
 
 window.addEventListener('beforeunload', () => {
   destroyed = true;
@@ -235,10 +240,41 @@ window.addEventListener('beforeunload', () => {
   window.clearTimeout(idleTimer);
   window.clearTimeout(returnTimer);
   window.clearTimeout(voiceTimer);
+  window.clearInterval(timeTimer);
   if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   character.destroy();
 });
 
 setState('idle');
-scheduleBlink();
-scheduleIdle();
+
+if (labMode) {
+  const validLabState = STATES[labState] ? labState : 'idle';
+  const gazeMap = {
+    left: [-.72, 0],
+    right: [.72, 0],
+    up: [0, -.55],
+    down: [0, .55],
+    center: [0, 0]
+  };
+  setState(validLabState);
+  const [gx, gy] = gazeMap[labGaze] || gazeMap.center;
+  character.setAttention(gx, gy);
+
+  if (validLabState === 'blink') {
+    window.setTimeout(() => character.blink(), 260);
+  }
+
+  window.setTimeout(() => {
+    destroyed = true;
+    window.clearTimeout(blinkTimer);
+    window.clearTimeout(idleTimer);
+    window.clearTimeout(returnTimer);
+    window.clearTimeout(voiceTimer);
+    window.clearInterval(timeTimer);
+    character.destroy();
+    document.documentElement.dataset.labDone = 'true';
+  }, 1500);
+} else {
+  scheduleBlink();
+  scheduleIdle();
+}
