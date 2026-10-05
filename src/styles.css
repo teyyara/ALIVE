@@ -31,7 +31,7 @@ button { color: inherit; }
 .world { z-index: 0; overflow: hidden; }
 
 .world-image {
-  background: url('/assets/alive-clean-portrait.jpg') center center / cover no-repeat;
+  background: url('/assets/alive-base.jpg') center center / cover no-repeat;
   transform: scale(1.015);
   filter: saturate(.88) contrast(1.02) brightness(.76);
   transition: filter 1.8s ease, transform 3s cubic-bezier(.2,.7,.2,1);
