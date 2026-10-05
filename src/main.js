@@ -284,8 +284,9 @@ composer.addEventListener('submit', (event) => {
       }
     }
 
-    if (streamedSpeech && streamSpeechBuffer.trim()) {
+    if (voiceButton.matches('[aria-pressed="true"]') && streamSpeechBuffer.trim()) {
       voice.enqueue(streamSpeechBuffer.trim());
+      streamedSpeech = true;
     }
 
     if (!streamedBubble) {
@@ -465,10 +466,11 @@ function tick() {
 }
 
 attachAttention(stage);
-createIdleBehavior({ stage, setState, getState });
+const destroyIdleBehavior = createIdleBehavior({ stage, setState, getState });
 
 window.addEventListener('beforeunload', () => {
   world.destroy();
+  destroyIdleBehavior();
   voice.destroy();
 }, { once: true });
 
