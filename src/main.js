@@ -303,6 +303,11 @@ composer.addEventListener('submit', (event) => {
       }
     }
 
+    if (conversationToken !== activeConversationToken || conversationController.signal.aborted) {
+      streamedBubble?.remove();
+      return;
+    }
+
     if (voiceButton.matches('[aria-pressed="true"]') && streamSpeechBuffer.trim()) {
       voice.enqueue(streamSpeechBuffer.trim());
       streamedSpeech = true;
@@ -471,9 +476,12 @@ message.addEventListener('input', () => {
     setState('listening');
   }
 
-  if (getState() === 'thinking') {
+  if (
+    (getState() === 'thinking' || getState() === 'speaking') &&
+    activeConversationController
+  ) {
     window.clearTimeout(replyTimer);
-    activeConversationController?.abort();
+    activeConversationController.abort();
     activeConversationController = null;
     activeConversationToken += 1;
     setState('listening');
