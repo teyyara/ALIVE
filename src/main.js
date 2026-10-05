@@ -465,16 +465,19 @@ function tick() {
   }).format(new Date());
 }
 
-attachAttention(stage);
+const destroyAttention = attachAttention(stage);
 const destroyIdleBehavior = createIdleBehavior({ stage, setState, getState });
 
+const clockTimer = window.setInterval(tick, 1000);
+
 window.addEventListener('beforeunload', () => {
+  window.clearInterval(clockTimer);
   world.destroy();
+  destroyVisitorPresence();
+  destroyAttention();
   destroyIdleBehavior();
   voice.destroy();
 }, { once: true });
-
-setInterval(tick, 1000);
 tick();
 setState('idle');
 
