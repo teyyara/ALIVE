@@ -1,4 +1,4 @@
-export function attachAttention(stage) {
+export function attachAttention(stage, { onHold, onRelease } = {}) {
   const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   if (reduceMotion) return () => {};
 
@@ -9,6 +9,7 @@ export function attachAttention(stage) {
   let raf = 0;
   let resting = true;
   let dwellTimer;
+  let held = false;
 
   const update = (event) => {
     const rect = stage.getBoundingClientRect();
@@ -23,6 +24,10 @@ export function attachAttention(stage) {
     resting = false;
 
     window.clearTimeout(dwellTimer);
+    if (held) {
+      held = false;
+      onRelease?.();
+    }
     stage.classList.remove('attention-held');
 
     const insideStage =
@@ -33,7 +38,9 @@ export function attachAttention(stage) {
 
     if (insideStage) {
       dwellTimer = window.setTimeout(() => {
+        held = true;
         stage.classList.add('attention-held');
+        onHold?.();
       }, 850);
     }
   };
@@ -43,6 +50,10 @@ export function attachAttention(stage) {
     targetY = 0;
     resting = true;
     window.clearTimeout(dwellTimer);
+    if (held) {
+      held = false;
+      onRelease?.();
+    }
     stage.classList.remove('attention-held');
   };
 
