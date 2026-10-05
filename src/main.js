@@ -215,8 +215,16 @@ function fallbackReply(input) {
   return localFallback();
 }
 
+let speechBeatTimer;
+
 const voice = createVoiceController({
   onStart: () => setState('speaking'),
+  onBoundary: () => {
+    scene.classList.remove('speech-beat');
+    window.clearTimeout(speechBeatTimer);
+    requestAnimationFrame(() => scene.classList.add('speech-beat'));
+    speechBeatTimer = window.setTimeout(() => scene.classList.remove('speech-beat'), 190);
+  },
   onEnd: () => setState('warm'),
   onError: () => {
     addBubble('alive', 'My voice could not start here. The room is still listening.');
