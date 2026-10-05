@@ -145,6 +145,17 @@ button { color: inherit; }
   63% { transform: translate3d(-.45px,-.45px,0) rotate(.07deg) scale(1); }
 }
 
+@keyframes alive-speaking-head {
+  0%, 100% { transform: translate3d(0,0,0) rotate(0deg) scale(1); }
+  27% { transform: translate3d(.28px,-.55px,0) rotate(-.04deg) scale(1.0008); }
+  56% { transform: translate3d(-.24px,.1px,0) rotate(.035deg) scale(1); }
+  78% { transform: translate3d(.16px,-.3px,0) rotate(-.02deg) scale(1.0004); }
+}
+
+.alive[data-state="speaking"] .portrait-head {
+  animation: alive-speaking-head 1.65s ease-in-out infinite;
+}
+
 @keyframes alive-breath {
   0%, 100% { transform: translateY(0) scale(1); }
   42% { transform: translateY(-1.6px) scale(1.006); }
