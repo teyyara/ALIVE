@@ -107,6 +107,10 @@ export function attachAttention(stage, { onHold, onRelease } = {}) {
     stage.style.setProperty('--brow-x', `${(gazeX * 2.2).toFixed(2)}px`);
     stage.style.setProperty('--brow-y', `${(gazeY * 1.4).toFixed(2)}px`);
     stage.style.setProperty('--attention-rest', resting ? '1' : '0');
+    stage.style.setProperty('--depth-back-x', `${(gazeX * 2.4).toFixed(2)}px`);
+    stage.style.setProperty('--depth-back-y', `${(gazeY * 1.6).toFixed(2)}px`);
+    stage.style.setProperty('--depth-front-x', `${(gazeX * -1.7).toFixed(2)}px`);
+    stage.style.setProperty('--depth-front-y', `${(gazeY * -1.2).toFixed(2)}px`);
 
     raf = requestAnimationFrame(animate);
   };
