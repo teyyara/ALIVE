@@ -14,7 +14,7 @@ The repository is intentionally small at first. The goal is not a conventional c
 - time-of-day room atmospheres and moon cycle
 - rare passing city-light environmental events
 - state-reactive portrait lighting
-- GPU-driven live portrait surface
+- GPU-driven live portrait surface with source-aware facial landmarks
 - adaptive local microphone noise floor
 - speech-boundary room response
 - rare organic double-blink behavior
