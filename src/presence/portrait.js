@@ -19,7 +19,8 @@ uniform vec2 u_gaze;
 uniform float u_blink;
 uniform float u_speech;
 uniform float u_ready;
-uniform vec2 u_coverScale;
+uniform vec4 u_crop;
+uniform float u_viewAspect;
 
 varying vec2 v_uv;
 
@@ -65,28 +66,31 @@ vec2 subtleHeadMotion(vec2 uv, vec2 gaze) {
 }
 
 void main() {
-  vec2 uv = vec2(
-    0.5 + (v_uv.x - 0.5) * u_coverScale.x,
-    0.5 + (v_uv.y - 0.5) * u_coverScale.y
-  );
+  float cropAspect = u_crop.z / u_crop.w;
+  vec2 coverScale = cropAspect > u_viewAspect
+    ? vec2(u_viewAspect / cropAspect, 1.0)
+    : vec2(1.0, cropAspect / u_viewAspect);
+
+  vec2 cropUv = 0.5 + (v_uv - 0.5) * coverScale;
+  vec2 uv = u_crop.xy + cropUv * u_crop.zw;
 
   float breath = 0.5 + 0.5 * sin(u_time * 0.78);
   uv = globalBreath(uv, breath);
   uv = subtleHeadMotion(uv, u_gaze);
 
-  vec2 leftEye = vec2(0.375, 0.34);
-  vec2 rightEye = vec2(0.625, 0.34);
+  vec2 leftEye = vec2(0.468, 0.382);
+  vec2 rightEye = vec2(0.566, 0.382);
 
-  vec2 eyeRadius = vec2(0.105, 0.065);
-  vec2 eyeShift = vec2(u_gaze.x * 0.014, u_gaze.y * 0.008);
+  vec2 eyeRadius = vec2(0.078, 0.050);
+  vec2 eyeShift = vec2(u_gaze.x * 0.022, u_gaze.y * 0.013);
 
   float blinkAmount = smoothstep(0.0, 1.0, u_blink);
 
   uv = eyeWarp(uv, leftEye, eyeRadius, eyeShift, blinkAmount);
   uv = eyeWarp(uv, rightEye, eyeRadius, eyeShift, blinkAmount);
 
-  vec2 mouthCenter = vec2(0.50, 0.565);
-  vec2 mouthQ = (uv - mouthCenter) / vec2(0.115, 0.060);
+  vec2 mouthCenter = vec2(0.50, 0.555);
+  vec2 mouthQ = (uv - mouthCenter) / vec2(0.095, 0.048);
   float mouthWeight = exp(-dot(mouthQ, mouthQ) * 2.8);
   uv.y += u_speech * 0.0035 * mouthWeight * sin(u_time * 14.0);
 
@@ -173,24 +177,27 @@ export function createLivingPortrait(canvas, src) {
       gl.uniform1f(uniforms.speech, speech);
       gl.uniform1f(uniforms.ready, ready);
 
-      const imageAspect = image.width / Math.max(1, image.height);
-      const viewAspect = canvas.width / Math.max(1, canvas.height);
-      const coverScale = imageAspect > viewAspect
-        ? [viewAspect / imageAspect, 1]
-        : [1, imageAspect / viewAspect];
-
-      gl.uniform2f(uniforms.coverScale, coverScale[0], coverScale[1]);
+      gl.uniform4f(uniforms.crop, 0.15, 0.02, 0.65, 0.86);
+      gl.uniform1f(uniforms.viewAspect, canvas.width / Math.max(1, canvas.height));
 
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     } else if (fallbackContext && image?.complete) {
       resizeCanvas();
       fallbackContext.clearRect(0, 0, canvas.width, canvas.height);
-      const imageAspect = image.width / Math.max(1, image.height);
+      const sourceX = image.width * 0.15;
+      const sourceY = image.height * 0.02;
+      const sourceWidth = image.width * 0.65;
+      const sourceHeight = image.height * 0.86;
+      const sourceAspect = sourceWidth / sourceHeight;
       const viewAspect = canvas.width / Math.max(1, canvas.height);
-      const drawWidth = imageAspect > viewAspect ? canvas.height * imageAspect : canvas.width;
-      const drawHeight = imageAspect > viewAspect ? canvas.height : canvas.width / imageAspect;
+      const drawWidth = sourceAspect > viewAspect ? canvas.height * sourceAspect : canvas.width;
+      const drawHeight = sourceAspect > viewAspect ? canvas.height : canvas.width / sourceAspect;
       fallbackContext.drawImage(
         image,
+        sourceX,
+        sourceY,
+        sourceWidth,
+        sourceHeight,
         (canvas.width - drawWidth) * 0.5,
         (canvas.height - drawHeight) * 0.5,
         drawWidth,
@@ -284,7 +291,8 @@ export function createLivingPortrait(canvas, src) {
           blink: gl.getUniformLocation(program, 'u_blink'),
           speech: gl.getUniformLocation(program, 'u_speech'),
           ready: gl.getUniformLocation(program, 'u_ready'),
-          coverScale: gl.getUniformLocation(program, 'u_coverScale')
+          crop: gl.getUniformLocation(program, 'u_crop'),
+          viewAspect: gl.getUniformLocation(program, 'u_viewAspect')
         };
 
         ready = 1;
