@@ -13,6 +13,7 @@ The repository is intentionally small at first. The goal is not a conventional c
 - restrained portrait depth planes
 - time-of-day room atmospheres and moon cycle
 - state-reactive portrait lighting
+- adaptive local microphone noise floor
 - typing-aware room response
 - optional browser voice output and direct microphone recording
 - modular source layout ready for a layered 2.5D/3D body
