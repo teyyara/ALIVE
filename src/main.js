@@ -17,7 +17,7 @@ app.innerHTML = `
 
     <section class="presence" aria-label="ALIVE presence">
       <div class="character-stage" id="character-stage">
-        <canvas id="character-canvas" aria-label="ALIVE, a digital presence"></canvas>
+        <img class="portrait-base" src="/assets/alive-clean-portrait.webp" alt="ALIVE" /><canvas id="character-canvas" aria-label="ALIVE, a digital presence"></canvas>
       </div>
       <div class="presence-copy">
         <div class="eyebrow" id="eyebrow">A DIGITAL PRESENCE</div>
