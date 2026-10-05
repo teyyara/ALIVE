@@ -188,8 +188,8 @@ function handlePointerMove(event) {
   }
 }
 
-stage.addEventListener('pointermove', handlePointerMove, { passive: true });
-stage.addEventListener('pointerleave', () => {
+window.addEventListener('pointermove', handlePointerMove, { passive: true });
+window.addEventListener('pointerleave', () => {
   character.setAttention(0, 0);
   root.style.setProperty('--attention-x', '0px');
   root.style.setProperty('--attention-y', '0px');
