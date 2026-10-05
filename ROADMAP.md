@@ -65,7 +65,7 @@ The room becomes responsive.
 ## 07 — Embodiment
 Explore increasingly expressive character rendering.
 - 2.5D layer deformation ✅
-- richer face animation
+- richer face animation ✅
 - hands and posture
 - WebGL / 3D experiments where they improve presence
 
