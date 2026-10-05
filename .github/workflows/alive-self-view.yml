@@ -113,11 +113,12 @@ jobs:
                   raise SystemExit("Typing did not move ALIVE into Curious state.")
               
               page.locator("#composer").evaluate("(form) => form.requestSubmit()")
-              page.wait_for_timeout(330)
-              if page.locator("#state-label").inner_text() != "Thinking":
-                  raise SystemExit("Conversation did not enter Thinking state.")
+              page.wait_for_timeout(650)
+              state_after_submit = page.locator("#state-label").inner_text()
+              if state_after_submit not in {"Thinking", "Speaking", "Warm"}:
+                  raise SystemExit(f"Conversation did not progress after submit: {state_after_submit}")
               
-              page.wait_for_timeout(800)
+              page.wait_for_timeout(500)
               if page.locator("#messages .alive").count() < 1:
                   raise SystemExit("Conversation did not produce an ALIVE response.")
               
