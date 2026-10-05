@@ -1,4 +1,5 @@
 import { createLivingCharacter } from './character.js';
+import { createLivingPortrait } from './portrait.js';
 
 const app = document.querySelector('#app');
 
@@ -17,9 +18,7 @@ app.innerHTML = `
     <section class="presence" aria-label="ALIVE presence">
       <div class="character-stage" id="character-stage">
         <img class="portrait-base" src="/assets/alive-clean-portrait.webp" alt="ALIVE" />
-        <img class="portrait-breath" src="/assets/alive-clean-portrait.webp" alt="" aria-hidden="true" />
-        <img class="portrait-head" src="/assets/alive-clean-portrait.webp" alt="" aria-hidden="true" />
-        <img class="portrait-mouth" src="/assets/alive-clean-portrait.webp" alt="" aria-hidden="true" />
+        <canvas id="portrait-canvas" aria-hidden="true"></canvas>
         <canvas id="character-canvas" aria-label="ALIVE, a digital presence"></canvas>
       </div>
       <div class="presence-copy">
@@ -43,6 +42,8 @@ app.innerHTML = `
 const root = document.querySelector('.alive');
 const stage = document.querySelector('#character-stage');
 const canvas = document.querySelector('#character-canvas');
+const portraitCanvas = document.querySelector('#portrait-canvas');
+const portraitFallback = document.querySelector('.portrait-base');
 
 const labParams = new URLSearchParams(window.location.search);
 const labState = labParams.get('lab');
@@ -59,6 +60,7 @@ const stateLabel = document.querySelector('#state-label');
 const eyebrow = document.querySelector('#eyebrow');
 const presenceLine = document.querySelector('#presence-line');
 
+const portrait = createLivingPortrait(portraitCanvas, portraitFallback);
 const character = createLivingCharacter(canvas);
 
 let state = 'idle';
@@ -75,7 +77,7 @@ if (labMode || inspectMode) {
     blink: () => character.blink(),
     setGaze: (x, y) => character.setAttention(x, y),
     getState: () => state,
-    getCharacter: () => character.getDebugState()
+    getCharacter: () => ({ ...character.getDebugState(), portrait: portrait.getDebugState?.() ?? null })
   };
 }
 
@@ -106,6 +108,7 @@ function setState(next) {
   eyebrow.textContent = small;
   presenceLine.textContent = text;
   character.setState(stateExpression[state]);
+  portrait.setState(stateExpression[state]);
 }
 
 function addMessage(role, text) {
@@ -139,7 +142,10 @@ function speak(text) {
   utterance.pitch = 1.08;
   utterance.volume = .9;
   utterance.onstart = () => setState('speaking');
-  utterance.onboundary = () => character.speechPulse();
+  utterance.onboundary = () => {
+    character.speechPulse();
+    portrait.speechPulse();
+  };
   utterance.onend = () => setState('warm');
   window.speechSynthesis.speak(utterance);
 }
@@ -176,7 +182,10 @@ function handlePointerMove(event) {
   const rect = stage.getBoundingClientRect();
   const x = ((event.clientX - rect.left) / rect.width - .5) * 2;
   const y = ((event.clientY - rect.top) / rect.height - .42) * 2;
-  character.setAttention(Math.max(-1, Math.min(1, x)), Math.max(-1, Math.min(1, y)));
+  const clampedX = Math.max(-1, Math.min(1, x));
+  const clampedY = Math.max(-1, Math.min(1, y));
+  character.setAttention(clampedX, clampedY);
+  portrait.setAttention(clampedX, clampedY);
   root.style.setProperty('--visitor-x', `${event.clientX}px`);
   root.style.setProperty('--visitor-y', `${event.clientY}px`);
   root.style.setProperty('--attention-x', `${x * 1.6}px`);
@@ -191,6 +200,7 @@ function handlePointerMove(event) {
 window.addEventListener('pointermove', handlePointerMove, { passive: true });
 window.addEventListener('pointerleave', () => {
   character.setAttention(0, 0);
+  portrait.setAttention(0, 0);
   root.style.setProperty('--attention-x', '0px');
   root.style.setProperty('--attention-y', '0px');
   window.clearTimeout(returnTimer);
@@ -264,6 +274,7 @@ window.addEventListener('beforeunload', () => {
   window.clearTimeout(voiceTimer);
   window.clearInterval(timeTimer);
   if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  portrait.destroy();
   character.destroy();
 });
 
